@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delivery Department Tracker</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  /* ── TOKENS ── */
+  :root {
+    --navy: #0f1f3d;
+    --navy-mid: #1a3260;
+    --blue: #2563eb;
+    --blue-light: #eff6ff;
+    --blue-mid: #bfdbfe;
+    --amber: #d97706;
+    --amber-light: #fffbeb;
+    --green: #15803d;
+    --green-light: #f0fdf4;
+    --green-mid: #bbf7d0;
+    --purple: #7c3aed;
+    --purple-light: #f5f3ff;
+    --red: #dc2626;
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-300: #cbd5e1;
+    --gray-400: #94a3b8;
+    --gray-500: #64748b;
+    --gray-700: #334155;
+    --gray-900: #0f172a;
+    --white: #ffffff;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 15px; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--gray-50); color: var(--gray-900); min-height: 100vh; }
+
+  /* ── HEADER ── */
+  .header { background: var(--navy); color: white; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-md); }
+  .header-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1rem; letter-spacing: 0.02em; }
+  .header-brand svg { opacity: 0.9; }
+  .header-date { font-size: 0.8rem; color: #94a3b8; }
+  .db-status { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: #94a3b8; }
+  .db-dot { width: 7px; height: 7px; border-radius: 50%; background: #ef4444; }
+  .db-dot.connected { background: #22c55e; }
+
+  /* ── NAV ── */
+  .nav { background: white; border-bottom: 1px solid var(--gray-200); display: flex; padding: 0 2rem; gap: 0; position: sticky; top: 56px; z-index: 99; }
+  .nav-btn { padding: 14px 20px; font-size: 0.875rem; font-weight: 500; color: var(--gray-500); background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; font-family: inherit; white-space: nowrap; transition: color 0.15s; }
+  .nav-btn:hover { color: var(--gray-900); }
+  .nav-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+  /* ── LAYOUT ── */
+  .main { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1.5rem 3rem; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ── CARDS ── */
+  .card { background: white; border: 1px solid var(--gray-200); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; box-shadow: var(--shadow); }
+  .card-title { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gray-400); margin-bottom: 1rem; }
+
+  /* ── FORM ── */
+  .form-section { margin-bottom: 0.25rem; }
+  .section-banner { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: var(--radius); margin: 1rem 0 0.75rem; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
+  .banner-drive { background: var(--blue-light); color: var(--blue); border-left: 3px solid var(--blue); }
+  .banner-install { background: var(--green-light); color: var(--green); border-left: 3px solid var(--green); }
+  .banner-meal { background: var(--amber-light); color: var(--amber); border-left: 3px solid var(--amber); }
+  .banner-drive2 { background: #eef2ff; color: #4338ca; border-left: 3px solid #4338ca; }
+  .banner-install2 { background: #f0fdf4; color: #166534; border-left: 3px solid #166534; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1.25rem; }
+  .form-grid .full { grid-column: 1 / -1; }
+  .form-grid .third { grid-column: span 1; }
+  .field { display: flex; flex-direction: column; margin-bottom: 0.875rem; }
+  label { font-size: 0.78rem; font-weight: 600; color: var(--gray-500); margin-bottom: 4px; letter-spacing: 0.02em; }
+  input[type=text], input[type=date], input[type=time], input[type=number], select, textarea {
+    border: 1px solid var(--gray-300); border-radius: var(--radius); padding: 8px 10px; font-size: 0.875rem;
+    font-family: inherit; color: var(--gray-900); background: white; transition: border-color 0.15s, box-shadow 0.15s; width: 100%;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+  .time-row { display: flex; gap: 8px; align-items: flex-end; }
+  .time-row input { flex: 1; }
+  .hrs-pill { font-size: 0.75rem; font-weight: 600; padding: 5px 10px; border-radius: 20px; white-space: nowrap; min-width: 60px; text-align: center; background: var(--gray-100); color: var(--gray-500); }
+  .hrs-pill.has-val { background: var(--blue-light); color: var(--blue); }
+
+  .btn { padding: 9px 20px; border-radius: var(--radius); font-size: 0.875rem; font-weight: 600; cursor: pointer; font-family: inherit; border: 1px solid transparent; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-primary { background: var(--blue); color: white; }
+  .btn-primary:hover { background: #1d4ed8; }
+  .btn-secondary { background: white; color: var(--gray-700); border-color: var(--gray-300); }
+  .btn-secondary:hover { background: var(--gray-50); }
+  .btn-sm { padding: 5px 12px; font-size: 0.78rem; }
+  .btn-danger { background: white; color: var(--red); border-color: #fca5a5; }
+  .btn-danger:hover { background: #fff1f2; }
+
+  .toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--gray-900); color: white; padding: 12px 18px; border-radius: var(--radius-lg); font-size: 0.875rem; font-weight: 500; box-shadow: var(--shadow-md); z-index: 999; opacity: 0; transform: translateY(8px); transition: all 0.2s; pointer-events: none; display: flex; align-items: center; gap: 8px; }
+  .toast.show { opacity: 1; transform: none; }
+  .toast.success { background: #15803d; }
+  .toast.error { background: var(--red); }
+
+  /* ── TAGS ── */
+  .tag { display: inline-flex; align-items: center; font-size: 0.7rem; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+  .tag-delivery { background: var(--blue-light); color: #1e40af; }
+  .tag-grill { background: var(--green-light); color: #14532d; }
+  .tag-service { background: var(--amber-light); color: #92400e; }
+  .tag-boxed { background: var(--purple-light); color: #4c1d95; }
+  .tag-pergola { background: #fef9c3; color: #713f12; }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  th { background: var(--gray-50); padding: 9px 12px; text-align: left; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gray-400); border-bottom: 1px solid var(--gray-200); white-space: nowrap; }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--gray-100); vertical-align: middle; color: var(--gray-700); }
+  tr:hover td { background: var(--gray-50); }
+  tr:last-child td { border-bottom: none; }
+  .time-cell { font-size: 0.72rem; }
+  .time-cell .start-end { color: var(--gray-500); }
+  .time-cell .hrs { font-weight: 600; }
+
+  /* ── METRICS ── */
+  .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+  .metric { background: white; border: 1px solid var(--gray-200); border-radius: var(--radius-lg); padding: 1rem 1.25rem; box-shadow: var(--shadow); }
+  .metric-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gray-400); margin-bottom: 6px; }
+  .metric-value { font-size: 1.75rem; font-weight: 700; color: var(--gray-900); line-height: 1; }
+  .metric-sub { font-size: 0.72rem; color: var(--gray-400); margin-top: 4px; }
+  .metric.blue .metric-value { color: var(--blue); }
+  .metric.green .metric-value { color: var(--green); }
+  .metric.amber .metric-value { color: var(--amber); }
+
+  /* ── DASH CHARTS ── */
+  .dash-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .chart-title { font-size: 0.78rem; font-weight: 600; color: var(--gray-500); margin-bottom: 0.75rem; }
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
+  .leg-item { display: flex; align-items: center; gap: 5px; font-size: 0.72rem; color: var(--gray-500); }
+  .leg-sq { width: 10px; height: 10px; border-radius: 2px; }
+
+  /* ── CREW ── */
+  .crew-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .crew-row { display: flex; gap: 8px; align-items: center; }
+  .crew-row input { flex: 1; }
+  .remove-btn { background: none; border: none; cursor: pointer; color: var(--gray-300); font-size: 18px; line-height: 1; padding: 2px 4px; }
+  .remove-btn:hover { color: var(--red); }
+
+  /* ── FILTER BAR ── */
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
+  .filter-bar input, .filter-bar select { width: auto; }
+
+  /* ── EMPTY ── */
+  .empty { text-align: center; padding: 3rem; color: var(--gray-400); font-size: 0.875rem; }
+  .empty svg { margin-bottom: 0.75rem; opacity: 0.3; }
+
+  /* ── SETUP BANNER ── */
+  .setup-banner { background: #fffbeb; border: 1px solid #fde68a; border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 1.5rem; font-size: 0.875rem; color: #92400e; display: none; }
+  .setup-banner.show { display: block; }
+  .setup-banner strong { font-weight: 700; }
+  .setup-banner code { background: #fef3c7; padding: 1px 5px; border-radius: 4px; font-family: monospace; font-size: 0.8rem; }
+
+  .config-card { background: white; border: 1px solid var(--gray-200); border-radius: var(--radius-lg); padding: 1.5rem; max-width: 540px; margin: 2rem auto; box-shadow: var(--shadow-md); }
+  .config-card h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--gray-900); }
+  .config-card p { font-size: 0.85rem; color: var(--gray-500); margin-bottom: 1.25rem; line-height: 1.6; }
+  .config-card code { background: var(--gray-100); padding: 1px 5px; border-radius: 4px; font-family: monospace; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+
+<!-- SUPABASE CONFIG — fill these in -->
+<script>
+  const SUPABASE_URL = 'https://fsndpsoqkycgumyuuyvl.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzbmRwc29xa3ljZ3VteXV1eXZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczOTI4MTYsImV4cCI6MjA5Mjk2ODgxNn0.GJ4__C_Y8zW527QhZENl26t3VrgybrhtYUwEKQtUbfI';
+</script>
+
+<header class="header">
+  <div class="header-brand">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+    Delivery Department
+  </div>
+  <div style="display:flex;align-items:center;gap:1.5rem">
+    <div class="db-status"><div class="db-dot" id="db-dot"></div><span id="db-status-text">Connecting...</span></div>
+    <div class="header-date" id="header-date"></div>
+  </div>
+</header>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="showScreen('log',this)">Log Job</button>
+  <button class="nav-btn" onclick="showScreen('history',this)">Job History</button>
+  <button class="nav-btn" onclick="showScreen('crew',this)">Crew</button>
+  <button class="nav-btn" onclick="showScreen('dash',this)">Dashboard</button>
+</nav>
+
+<div class="main">
+  <!-- LOG JOB -->
+  <div id="screen-log" class="screen active">
+    <div class="card">
+      <div class="card-title">New Job Entry</div>
+      <div class="form-grid">
+        <div class="field third">
+          <label>Date</label>
+          <input type="date" id="f-date">
+        </div>
+        <div class="field third">
+          <label>Job type</label>
+          <select id="f-jobtype" onchange="toggleIslandFields()">
+            <option value="">— select —</option>
+            <option>Delivery</option>
+            <option>Grill Install</option>
+            <option>Service</option>
+            <option>Boxed Goods</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label>Crew assigned</label>
+          <input type="text" id="f-crew" list="crew-dl" placeholder="Pick from list or type freely — e.g. Sergio, Carlos">
+          <datalist id="crew-dl"></datalist>
+        </div>
+        <div class="field third">
+          <label>Customer name</label>
+          <input type="text" id="f-customer" placeholder="Last, First">
+        </div>
+        <div class="field third">
+          <label>Address</label>
+          <input type="text" id="f-address" placeholder="123 Main St, City">
+        </div>
+        <div class="field third" id="linft-field" style="display:none">
+          <label>Linear weighted feet</label>
+          <input type="number" id="f-linft" placeholder="0.0" step="0.1" min="0">
+        </div>
+        <div class="field third" id="pergola-field" style="display:none">
+          <label>Pergola?</label>
+          <select id="f-pergola">
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- DRIVE THERE -->
+      <div class="section-banner banner-drive">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        Drive to job site
+      </div>
+      <div class="form-grid">
+        <div class="field third">
+          <label>Depart shop</label>
+          <div class="time-row">
+            <input type="time" id="f-d1-start" oninput="calcHrs('d1')">
+          </div>
+        </div>
+        <div class="field third">
+          <label>Arrive job site</label>
+          <div class="time-row">
+            <input type="time" id="f-d1-end" oninput="calcHrs('d1')">
+            <span class="hrs-pill" id="d1-pill">— hrs</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- INSTALL AM -->
+      <div class="section-banner banner-install">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        Install — morning
+      </div>
+      <div class="form-grid">
+        <div class="field third">
+          <label>Start</label>
+          <input type="time" id="f-i1-start" oninput="calcHrs('i1')">
+        </div>
+        <div class="field third">
+          <label>End</label>
+          <div class="time-row">
+            <input type="time" id="f-i1-end" oninput="calcHrs('i1')">
+            <span class="hrs-pill" id="i1-pill">— hrs</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MEAL BREAK -->
+      <div class="section-banner banner-meal">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+        Meal break
+      </div>
+      <div class="form-grid">
+        <div class="field third">
+          <label>Start</label>
+          <input type="time" id="f-mb-start" oninput="calcHrs('mb')">
+        </div>
+        <div class="field third">
+          <label>End</label>
+          <div class="time-row">
+            <input type="time" id="f-mb-end" oninput="calcHrs('mb')">
+            <span class="hrs-pill" id="mb-pill">— hrs</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- INSTALL PM -->
+      <div class="section-banner banner-install2">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        Install — afternoon
+      </div>
+      <div class="form-grid">
+        <div class="field third">
+          <label>Start</label>
+          <input type="time" id="f-i2-start" oninput="calcHrs('i2')">
+        </div>
+        <div class="field third">
+          <label>End</label>
+          <div class="time-row">
+            <input type="time" id="f-i2-end" oninput="calcHrs('i2')">
+            <span class="hrs-pill" id="i2-pill">— hrs</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- DRIVE BACK -->
+      <div class="section-banner banner-drive2">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        Drive back to shop
+      </div>
+      <div class="form-grid">
+        <div class="field third">
+          <label>Depart job site</label>
+          <input type="time" id="f-d2-start" oninput="calcHrs('d2')">
+        </div>
+        <div class="field third">
+          <label>Arrive shop</label>
+          <div class="time-row">
+            <input type="time" id="f-d2-end" oninput="calcHrs('d2')">
+            <span class="hrs-pill" id="d2-pill">— hrs</span>
+          </div>
+        </div>
+        <div class="field full">
+          <label>Notes</label>
+          <input type="text" id="f-notes" placeholder="Any additional notes...">
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:12px;margin-top:4px">
+        <button class="btn btn-primary" onclick="saveJob()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Save Job
+        </button>
+        <div style="font-size:0.8rem;color:var(--gray-400)" id="total-preview"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JOB HISTORY -->
+  <div id="screen-history" class="screen">
+    <div class="filter-bar">
+      <input type="date" id="fil-from" style="width:150px">
+      <input type="date" id="fil-to" style="width:150px">
+      <select id="fil-type" style="width:160px">
+        <option value="">All job types</option>
+        <option>Delivery</option><option>Grill Install</option>
+        <option>Service</option><option>Boxed Goods</option>
+      </select>
+      <input type="text" id="fil-crew" placeholder="Filter by crew..." style="width:160px">
+      <button class="btn btn-secondary btn-sm" onclick="loadHistory()">Filter</button>
+      <button class="btn btn-secondary btn-sm" onclick="clearFilters()">Clear</button>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="table-wrap" id="history-table"></div>
+    </div>
+  </div>
+
+  <!-- CREW -->
+  <div id="screen-crew" class="screen">
+    <div class="card" style="max-width:520px">
+      <div class="card-title">Crew Roster</div>
+      <p style="font-size:0.85rem;color:var(--gray-400);margin-bottom:1rem">Names saved here appear in the drop-down when logging jobs.</p>
+      <div id="crew-fields" style="display:flex;flex-direction:column;gap:8px;margin-bottom:1rem"></div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-secondary btn-sm" onclick="addCrewField()">+ Add member</button>
+        <button class="btn btn-primary btn-sm" onclick="saveCrew()">Save roster</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="screen-dash" class="screen">
+    <div class="metrics-grid" id="dash-metrics"></div>
+    <div class="dash-row">
+      <div class="card">
+        <div class="chart-title">Jobs by type</div>
+        <div class="legend" id="leg-type"></div>
+        <div style="position:relative;height:200px"><canvas id="ch-type" role="img" aria-label="Jobs by type doughnut chart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="chart-title">Avg install hours by job type</div>
+        <div style="position:relative;height:220px"><canvas id="ch-avg" role="img" aria-label="Average install hours bar chart"></canvas></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:1rem">
+      <div class="chart-title">Jobs per day — last 30 days</div>
+      <div style="position:relative;height:160px"><canvas id="ch-daily" role="img" aria-label="Jobs per day line chart"></canvas></div>
+    </div>
+    <div class="dash-row">
+      <div class="card">
+        <div class="chart-title">Linear feet delivered per day</div>
+        <div style="position:relative;height:150px"><canvas id="ch-linft" role="img" aria-label="Linear feet per day bar chart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="chart-title">Drive vs install vs break hours (avg per job)</div>
+        <div style="position:relative;height:150px"><canvas id="ch-breakdown" role="img" aria-label="Time breakdown bar chart"></canvas></div>
+      </div>
+    </div>
+
+    <div style="margin:1.5rem 0 0.75rem;font-size:0.85rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#94a3b8">Weekly breakdown</div>
+
+    <div class="metrics-grid" id="week-metrics" style="margin-bottom:1rem"></div>
+
+    <div class="card" style="margin-bottom:1rem">
+      <div class="chart-title">Jobs per week</div>
+      <div style="position:relative;height:160px"><canvas id="ch-wjobs" role="img" aria-label="Jobs per week bar chart"></canvas></div>
+    </div>
+    <div class="dash-row">
+      <div class="card">
+        <div class="chart-title">Total hours per week</div>
+        <div style="position:relative;height:160px"><canvas id="ch-whrs" role="img" aria-label="Hours per week chart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="chart-title">Linear feet per week</div>
+        <div style="position:relative;height:160px"><canvas id="ch-wlinft" role="img" aria-label="Linear feet per week chart"></canvas></div>
+      </div>
+    </div>
+    <div class="dash-row">
+      <div class="card">
+        <div class="chart-title">Jobs per crew member (all time)</div>
+        <div style="position:relative;height:200px"><canvas id="ch-crew" role="img" aria-label="Jobs per crew member chart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="chart-title">Pergola jobs per week</div>
+        <div style="position:relative;height:200px"><canvas id="ch-wpergola" role="img" aria-label="Pergola jobs per week chart"></canvas></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:1rem">
+      <div class="chart-title">Avg job duration per week (hrs)</div>
+      <div style="position:relative;height:150px"><canvas id="ch-wavg" role="img" aria-label="Average job duration per week chart"></canvas></div>
+    </div>
+
+    <div style="margin:1.5rem 0 0.75rem;font-size:0.85rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#94a3b8">Island install analysis</div>
+
+    <div class="metrics-grid" id="island-metrics" style="margin-bottom:1rem"></div>
+
+    <div class="dash-row">
+      <div class="card">
+        <div class="chart-title">Avg install time by linear ft range (hrs)</div>
+        <div style="position:relative;height:200px"><canvas id="ch-linft-range" role="img" aria-label="Avg install time by linear feet range"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="chart-title">Install time — pergola vs no pergola (hrs)</div>
+        <div style="position:relative;height:200px"><canvas id="ch-pergola-compare" role="img" aria-label="Install time pergola vs no pergola"></canvas></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:1rem">
+      <div class="chart-title">Install time vs linear feet (all island jobs)</div>
+      <div style="position:relative;height:220px"><canvas id="ch-scatter" role="img" aria-label="Scatter plot install time vs linear feet"></canvas></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+let sbClient = null;
+let chartMap = {};
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+async function loadSupabase() {
+  return new Promise((resolve) => {
+    if (window.supabase && window.supabase.createClient) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    s.onload = resolve;
+    document.head.appendChild(s);
+  });
+}
+
+async function init() {
+  await loadSupabase();
+  document.getElementById('header-date').textContent = new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
+
+  // credentials are set, proceed to connect
+  try {
+    sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const { error } = await sbClient.from('jobs').select('id').limit(1);
+    if (error) throw error;
+    setDbStatus(true, 'Connected');
+  } catch(e) {
+    setDbStatus(false, 'Connection failed');
+    showToast('Database connection failed. Check your credentials.', 'error');
+  }
+  await refreshCrewDl();
+}
+
+function setDbStatus(ok, text) {
+  document.getElementById('db-dot').className = 'db-dot' + (ok ? ' connected' : '');
+  document.getElementById('db-status-text').textContent = text;
+}
+
+// ── SCREEN NAV ────────────────────────────────────────────────────────────────
+function showScreen(name, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'history') loadHistory();
+  if (name === 'crew') loadCrew();
+  if (name === 'dash') loadDash();
+}
+
+// ── TIME HELPERS ──────────────────────────────────────────────────────────────
+function toMins(t) { if (!t) return null; const [h,m] = t.split(':').map(Number); return h*60+m; }
+function minsToHrs(m) { return parseFloat((m/60).toFixed(2)); }
+function calcHrs(key) {
+  const s = document.getElementById(`f-${key}-start`).value;
+  const e = document.getElementById(`f-${key}-end`).value;
+  const pill = document.getElementById(`${key}-pill`);
+  if (!s || !e) { pill.textContent = '— hrs'; pill.className = 'hrs-pill'; return null; }
+  let diff = toMins(e) - toMins(s);
+  if (diff < 0) diff += 1440;
+  const h = minsToHrs(diff);
+  pill.textContent = h.toFixed(2) + ' hrs';
+  pill.className = 'hrs-pill has-val';
+  updateTotalPreview();
+  return h;
+}
+function getHrs(key) {
+  const s = document.getElementById(`f-${key}-start`).value;
+  const e = document.getElementById(`f-${key}-end`).value;
+  if (!s || !e) return null;
+  let diff = toMins(e) - toMins(s);
+  if (diff < 0) diff += 1440;
+  return minsToHrs(diff);
+}
+function fmtTime(t) {
+  if (!t) return '—';
+  const [h,m] = t.split(':').map(Number);
+  return `${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;
+}
+function updateTotalPreview() {
+  const keys = ['d1','i1','mb','i2','d2'];
+  const total = keys.reduce((s,k) => { const h=getHrs(k); return s+(h||0); }, 0);
+  const driveTotal = (getHrs('d1')||0) + (getHrs('d2')||0);
+  const installTotal = (getHrs('i1')||0) + (getHrs('i2')||0);
+  if (total > 0) {
+    document.getElementById('total-preview').textContent =
+      `Total: ${total.toFixed(2)} hrs  |  Drive: ${driveTotal.toFixed(2)}  |  Install: ${installTotal.toFixed(2)}  |  Break: ${(getHrs('mb')||0).toFixed(2)}`;
+  }
+}
+function toggleIslandFields() {
+  const v = document.getElementById('f-jobtype').value;
+  const show = v === 'Delivery' || v === 'Grill Install';
+  document.getElementById('linft-field').style.display = show ? '' : 'none';
+  document.getElementById('pergola-field').style.display = show ? '' : 'none';
+}
+
+// ── SAVE JOB ──────────────────────────────────────────────────────────────────
+async function saveJob() {
+  if (!sbClient) { showToast('Database not connected — configure Supabase first.', 'error'); return; }
+  const date = document.getElementById('f-date').value;
+  const customer = document.getElementById('f-customer').value.trim();
+  const jobtype = document.getElementById('f-jobtype').value;
+  if (!date || !customer || !jobtype) { showToast('Please fill in date, customer, and job type.', 'error'); return; }
+
+  const driveHrs = (getHrs('d1')||0) + (getHrs('d2')||0);
+  const installHrs = (getHrs('i1')||0) + (getHrs('i2')||0);
+  const mealHrs = getHrs('mb') || 0;
+
+  const job = {
+    date, customer,
+    address: document.getElementById('f-address').value.trim(),
+    crew: document.getElementById('f-crew').value.trim(),
+    job_type: jobtype,
+    lin_ft: parseFloat(document.getElementById('f-linft').value) || null,
+    pergola: document.getElementById('f-pergola').value || 'No',
+    drive1_start: document.getElementById('f-d1-start').value || null,
+    drive1_end: document.getElementById('f-d1-end').value || null,
+    drive1_hrs: getHrs('d1'),
+    install1_start: document.getElementById('f-i1-start').value || null,
+    install1_end: document.getElementById('f-i1-end').value || null,
+    install1_hrs: getHrs('i1'),
+    meal_start: document.getElementById('f-mb-start').value || null,
+    meal_end: document.getElementById('f-mb-end').value || null,
+    meal_hrs: getHrs('mb'),
+    install2_start: document.getElementById('f-i2-start').value || null,
+    install2_end: document.getElementById('f-i2-end').value || null,
+    install2_hrs: getHrs('i2'),
+    drive2_start: document.getElementById('f-d2-start').value || null,
+    drive2_end: document.getElementById('f-d2-end').value || null,
+    drive2_hrs: getHrs('d2'),
+    total_drive_hrs: driveHrs || null,
+    total_install_hrs: installHrs || null,
+    total_meal_hrs: mealHrs || null,
+    total_hrs: (driveHrs + installHrs + mealHrs) || null,
+    notes: document.getElementById('f-notes').value.trim() || null,
+  };
+
+  const { error } = await sbClient.from('jobs').insert([job]);
+  if (error) { showToast('Error saving job: ' + error.message, 'error'); return; }
+  showToast('Job saved!', 'success');
+
+  ['f-customer','f-address','f-notes','f-linft'].forEach(id => document.getElementById(id).value = '');
+  ['f-d1-start','f-d1-end','f-i1-start','f-i1-end','f-mb-start','f-mb-end','f-i2-start','f-i2-end','f-d2-start','f-d2-end'].forEach(id => document.getElementById(id).value = '');
+  ['d1','i1','mb','i2','d2'].forEach(k => { const p=document.getElementById(`${k}-pill`); p.textContent='— hrs'; p.className='hrs-pill'; });
+  document.getElementById('f-jobtype').value = '';
+  document.getElementById('total-preview').textContent = '';
+  toggleIslandFields();
+}
+
+// ── HISTORY ──────────────────────────────────────────────────────────────────
+async function loadHistory() {
+  if (!sbClient) { document.getElementById('history-table').innerHTML = '<div class="empty">Database not connected.</div>'; return; }
+  let q = sbClient.from('jobs').select('*').order('date', {ascending:false}).order('created_at',{ascending:false});
+  const from = document.getElementById('fil-from').value;
+  const to = document.getElementById('fil-to').value;
+  const type = document.getElementById('fil-type').value;
+  const crew = document.getElementById('fil-crew').value.trim();
+  if (from) q = q.gte('date', from);
+  if (to) q = q.lte('date', to);
+  if (type) q = q.eq('job_type', type);
+  if (crew) q = q.ilike('crew', `%${crew}%`);
+  const { data, error } = await q;
+  if (error) { showToast('Error loading jobs: ' + error.message, 'error'); return; }
+  renderHistoryTable(data || []);
+}
+function clearFilters() {
+  ['fil-from','fil-to','fil-crew'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('fil-type').value = '';
+  loadHistory();
+}
+function tagHtml(type) {
+  const map = { Delivery:'tag-delivery', 'Grill Install':'tag-grill', Service:'tag-service', 'Boxed Goods':'tag-boxed' };
+  return `<span class="tag ${map[type]||''}">${type}</span>`;
+}
+function renderHistoryTable(jobs) {
+  const c = document.getElementById('history-table');
+  if (!jobs.length) { c.innerHTML = '<div class="empty">No jobs found.</div>'; return; }
+  c.innerHTML = `<table>
+    <thead><tr>
+      <th>Date</th><th>Customer</th><th>Crew</th><th>Type</th><th>Lin.Ft</th>
+      <th>Drive there</th><th>Install AM</th><th>Meal</th><th>Install PM</th><th>Drive back</th>
+      <th>Total hrs</th><th>Notes</th>
+    </tr></thead>
+    <tbody>${jobs.map(j => `<tr>
+      <td style="white-space:nowrap;font-weight:600">${j.date}</td>
+      <td><div style="font-weight:600;font-size:0.82rem">${j.customer}</div><div style="font-size:0.72rem;color:var(--gray-400)">${j.address||''}</div></td>
+      <td style="font-size:0.78rem;max-width:120px">${j.crew||'—'}</td>
+      <td>${tagHtml(j.job_type)}${j.pergola==='Yes'?'<span class="tag tag-pergola" style="margin-left:3px">Pergola</span>':''}</td>
+      <td>${j.lin_ft != null ? parseFloat(j.lin_ft).toFixed(1) : '—'}</td>
+      <td class="time-cell"><div class="start-end">${fmtTime(j.drive1_start)} – ${fmtTime(j.drive1_end)}</div><div class="hrs" style="color:var(--blue)">${j.drive1_hrs!=null?j.drive1_hrs.toFixed(2)+' hrs':'—'}</div></td>
+      <td class="time-cell"><div class="start-end">${fmtTime(j.install1_start)} – ${fmtTime(j.install1_end)}</div><div class="hrs" style="color:var(--green)">${j.install1_hrs!=null?j.install1_hrs.toFixed(2)+' hrs':'—'}</div></td>
+      <td class="time-cell"><div class="start-end">${fmtTime(j.meal_start)} – ${fmtTime(j.meal_end)}</div><div class="hrs" style="color:var(--amber)">${j.meal_hrs!=null?j.meal_hrs.toFixed(2)+' hrs':'—'}</div></td>
+      <td class="time-cell"><div class="start-end">${fmtTime(j.install2_start)} – ${fmtTime(j.install2_end)}</div><div class="hrs" style="color:var(--green)">${j.install2_hrs!=null?j.install2_hrs.toFixed(2)+' hrs':'—'}</div></td>
+      <td class="time-cell"><div class="start-end">${fmtTime(j.drive2_start)} – ${fmtTime(j.drive2_end)}</div><div class="hrs" style="color:#4338ca">${j.drive2_hrs!=null?j.drive2_hrs.toFixed(2)+' hrs':'—'}</div></td>
+      <td style="font-weight:700;font-size:0.9rem">${j.total_hrs!=null?j.total_hrs.toFixed(2):'—'}</td>
+      <td style="font-size:0.75rem;color:var(--gray-400);max-width:140px">${j.notes||''}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+// ── CREW ─────────────────────────────────────────────────────────────────────
+async function loadCrew() {
+  if (!sbClient) return;
+  const { data } = await sbClient.from('crew').select('*').order('sort_order');
+  const f = document.getElementById('crew-fields');
+  f.innerHTML = '';
+  (data||[]).forEach((m,i) => addCrewField(m.name, m.id));
+  refreshCrewDl(data||[]);
+}
+function addCrewField(name='', dbId=null) {
+  const f = document.getElementById('crew-fields');
+  const div = document.createElement('div');
+  div.className = 'crew-row';
+  div.dataset.dbId = dbId || '';
+  div.innerHTML = `<input type="text" value="${name}" placeholder="Crew member name"><button class="remove-btn" onclick="this.parentElement.remove()">×</button>`;
+  f.appendChild(div);
+}
+async function saveCrew() {
+  if (!sbClient) return;
+  const rows = document.querySelectorAll('#crew-fields .crew-row');
+  const names = [...rows].map(r => r.querySelector('input').value.trim()).filter(Boolean);
+  await sbClient.from('crew').delete().neq('id', 0);
+  if (names.length) {
+    await sbClient.from('crew').insert(names.map((name,i) => ({ name, sort_order: i })));
+  }
+  await refreshCrewDl();
+  showToast('Roster saved!', 'success');
+}
+async function refreshCrewDl(data=null) {
+  if (!supabase && !data) return;
+  if (!data) { const r = await sbClient.from('crew').select('name').order('sort_order'); data = r.data||[]; }
+  document.getElementById('crew-dl').innerHTML = data.map(m=>`<option value="${m.name}">`).join('');
+}
+
+// ── DASHBOARD ────────────────────────────────────────────────────────────────
+function killChart(id) { if (chartMap[id]) { chartMap[id].destroy(); delete chartMap[id]; } }
+async function loadDash() {
+  if (!sbClient) return;
+  const { data: jobs } = await sbClient.from('jobs').select('*');
+  const all = jobs || [];
+
+  const total = all.length;
+  const totalLinFt = all.reduce((s,j)=>s+(parseFloat(j.lin_ft)||0),0);
+  const pergCount = all.filter(j=>j.pergola==='Yes').length;
+  const avgHrs = total ? (all.reduce((s,j)=>s+(j.total_hrs||0),0)/total) : 0;
+  const avgDrive = total ? (all.reduce((s,j)=>s+(j.total_drive_hrs||0),0)/total) : 0;
+  const avgInst = total ? (all.reduce((s,j)=>s+(j.total_install_hrs||0),0)/total) : 0;
+
+  document.getElementById('dash-metrics').innerHTML = `
+    <div class="metric blue"><div class="metric-label">Total jobs</div><div class="metric-value">${total}</div></div>
+    <div class="metric"><div class="metric-label">Avg total hrs / job</div><div class="metric-value">${avgHrs.toFixed(1)}</div></div>
+    <div class="metric green"><div class="metric-label">Avg install hrs / job</div><div class="metric-value">${avgInst.toFixed(1)}</div><div class="metric-sub">Avg drive: ${avgDrive.toFixed(1)} hrs</div></div>
+    <div class="metric amber"><div class="metric-label">Total lin. ft</div><div class="metric-value">${totalLinFt.toFixed(0)}</div><div class="metric-sub">${pergCount} jobs with pergola</div></div>`;
+
+  const types = ['Delivery','Grill Install','Service','Boxed Goods'];
+  const typeColors = ['#2563eb','#15803d','#d97706','#7c3aed'];
+  const typeCounts = types.map(t => all.filter(j=>j.job_type===t).length);
+  const typeInstHrs = types.map(t => {
+    const jobs = all.filter(j=>j.job_type===t&&j.total_install_hrs!=null);
+    return jobs.length ? jobs.reduce((s,j)=>s+j.total_install_hrs,0)/jobs.length : 0;
+  });
+
+  document.getElementById('leg-type').innerHTML = types.map((t,i)=>
+    `<div class="leg-item"><span class="leg-sq" style="background:${typeColors[i]}"></span>${t} (${typeCounts[i]})</div>`).join('');
+
+  killChart('type');
+  chartMap['type'] = new Chart(document.getElementById('ch-type'),{
+    type:'doughnut',
+    data:{labels:types,datasets:[{data:typeCounts,backgroundColor:typeColors,borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
+  });
+
+  killChart('avg');
+  chartMap['avg'] = new Chart(document.getElementById('ch-avg'),{
+    type:'bar',
+    data:{labels:types,datasets:[{data:typeInstHrs.map(v=>parseFloat(v.toFixed(2))),backgroundColor:typeColors,borderRadius:4,label:'Avg install hrs'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11}}},x:{grid:{display:false},ticks:{font:{size:11}}}}}
+  });
+
+  const today = new Date();
+  const days=[],dayCounts=[],dayLinFt=[];
+  for(let i=29;i>=0;i--){
+    const d=new Date(today); d.setDate(d.getDate()-i);
+    const ds=d.toISOString().slice(0,10);
+    days.push(ds.slice(5));
+    dayCounts.push(all.filter(j=>j.date===ds).length);
+    dayLinFt.push(all.filter(j=>j.date===ds).reduce((s,j)=>s+(parseFloat(j.lin_ft)||0),0));
+  }
+
+  killChart('daily');
+  chartMap['daily'] = new Chart(document.getElementById('ch-daily'),{
+    type:'line',
+    data:{labels:days,datasets:[{data:dayCounts,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,0.06)',tension:0.4,fill:true,pointRadius:2,pointBackgroundColor:'#2563eb',label:'Jobs'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:9},autoSkip:true,maxTicksLimit:15,maxRotation:45},grid:{display:false}}}}
+  });
+
+  killChart('linft');
+  chartMap['linft'] = new Chart(document.getElementById('ch-linft'),{
+    type:'bar',
+    data:{labels:days,datasets:[{data:dayLinFt.map(v=>parseFloat(v.toFixed(1))),backgroundColor:'rgba(37,99,235,0.45)',borderColor:'#2563eb',borderWidth:1,borderRadius:3,label:'Lin ft'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10}}},x:{ticks:{font:{size:9},autoSkip:true,maxTicksLimit:15,maxRotation:45},grid:{display:false}}}}
+  });
+
+
+
+  // ── ISLAND ANALYSIS ───────────────────────────────────────────────────────
+  const islandJobs = all.filter(j => (j.job_type==='Delivery'||j.job_type==='Grill Install') && j.lin_ft && j.total_install_hrs);
+  const withPergola = islandJobs.filter(j => j.pergola==='Yes');
+  const noPergola = islandJobs.filter(j => j.pergola!=='Yes');
+
+  const avgInstAll = islandJobs.length ? islandJobs.reduce((s,j)=>s+j.total_install_hrs,0)/islandJobs.length : 0;
+  const avgInstPerg = withPergola.length ? withPergola.reduce((s,j)=>s+j.total_install_hrs,0)/withPergola.length : 0;
+  const avgInstNoPerg = noPergola.length ? noPergola.reduce((s,j)=>s+j.total_install_hrs,0)/noPergola.length : 0;
+  const avgLinFt = islandJobs.length ? islandJobs.reduce((s,j)=>s+(parseFloat(j.lin_ft)||0),0)/islandJobs.length : 0;
+
+  document.getElementById('island-metrics').innerHTML=`
+    <div class="metric"><div class="metric-label">Island jobs tracked</div><div class="metric-value">${islandJobs.length}</div></div>
+    <div class="metric green"><div class="metric-label">Avg install hrs (all islands)</div><div class="metric-value">${avgInstAll.toFixed(1)}</div></div>
+    <div class="metric amber"><div class="metric-label">Avg install hrs (w/ pergola)</div><div class="metric-value">${avgInstPerg.toFixed(1)}<div class="metric-sub">${withPergola.length} jobs</div></div></div>
+    <div class="metric blue"><div class="metric-label">Avg install hrs (no pergola)</div><div class="metric-value">${avgInstNoPerg.toFixed(1)}<div class="metric-sub">${noPergola.length} jobs</div></div></div>`;
+
+  // Linear ft ranges
+  const ranges = [{label:'0-5 ft',min:0,max:5},{label:'6-10 ft',min:6,max:10},{label:'11-15 ft',min:11,max:15},{label:'16-20 ft',min:16,max:20},{label:'21-25 ft',min:21,max:25},{label:'26+ ft',min:26,max:999}];
+  const rangeAvgs = ranges.map(r => {
+    const jobs = islandJobs.filter(j => parseFloat(j.lin_ft)>=r.min && parseFloat(j.lin_ft)<=r.max);
+    return jobs.length ? parseFloat((jobs.reduce((s,j)=>s+j.total_install_hrs,0)/jobs.length).toFixed(2)) : null;
+  });
+  const rangeColors = ranges.map((_,i) => {
+    const colors = ['#bfdbfe','#93c5fd','#60a5fa','#3b82f6','#2563eb','#1d4ed8'];
+    return colors[i];
+  });
+
+  killChart('linft-range');
+  chartMap['linft-range']=new Chart(document.getElementById('ch-linft-range'),{
+    type:'bar',
+    data:{labels:ranges.map(r=>r.label),datasets:[{data:rangeAvgs,backgroundColor:rangeColors,borderRadius:4,label:'Avg install hrs'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw!=null?ctx.raw+' hrs':'No data'}}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}
+  });
+
+  // Pergola vs no pergola - grouped bar
+  killChart('pergola-compare');
+  chartMap['pergola-compare']=new Chart(document.getElementById('ch-pergola-compare'),{
+    type:'bar',
+    data:{
+      labels:['Avg install hrs','Avg drive hrs','Avg total hrs'],
+      datasets:[
+        {label:'With pergola',data:[
+          withPergola.length?parseFloat((withPergola.reduce((s,j)=>s+(j.total_install_hrs||0),0)/withPergola.length).toFixed(2)):0,
+          withPergola.length?parseFloat((withPergola.reduce((s,j)=>s+(j.total_drive_hrs||0),0)/withPergola.length).toFixed(2)):0,
+          withPergola.length?parseFloat((withPergola.reduce((s,j)=>s+(j.total_hrs||0),0)/withPergola.length).toFixed(2)):0,
+        ],backgroundColor:'#d97706',borderRadius:4},
+        {label:'No pergola',data:[
+          noPergola.length?parseFloat((noPergola.reduce((s,j)=>s+(j.total_install_hrs||0),0)/noPergola.length).toFixed(2)):0,
+          noPergola.length?parseFloat((noPergola.reduce((s,j)=>s+(j.total_drive_hrs||0),0)/noPergola.length).toFixed(2)):0,
+          noPergola.length?parseFloat((noPergola.reduce((s,j)=>s+(j.total_hrs||0),0)/noPergola.length).toFixed(2)):0,
+        ],backgroundColor:'#2563eb',borderRadius:4},
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:10}}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}
+  });
+
+  // Scatter: install time vs linear feet
+  const scatterData = islandJobs.map(j => ({x:parseFloat(parseFloat(j.lin_ft).toFixed(1)), y:parseFloat(j.total_install_hrs.toFixed(2)), pergola:j.pergola}));
+  killChart('scatter');
+  chartMap['scatter']=new Chart(document.getElementById('ch-scatter'),{
+    type:'scatter',
+    data:{datasets:[
+      {label:'With pergola',data:scatterData.filter(d=>d.pergola==='Yes'),backgroundColor:'rgba(217,119,6,0.7)',pointRadius:6},
+      {label:'No pergola',data:scatterData.filter(d=>d.pergola!=='Yes'),backgroundColor:'rgba(37,99,235,0.7)',pointRadius:6},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:10}},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.raw.x} lin ft → ${ctx.raw.y} hrs`}}},scales:{x:{title:{display:true,text:'Linear feet',font:{size:10}},ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},y:{title:{display:true,text:'Install hrs',font:{size:10}},beginAtZero:true,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}}}}
+  });
+
+  // ── WEEKLY ────────────────────────────────────────────────────────────────
+  function getWeekKey(ds) {
+    const d = new Date(ds + 'T00:00:00');
+    const diff = d.getDate() - d.getDay() + (d.getDay()===0?-6:1);
+    const mon = new Date(d); mon.setDate(diff);
+    return mon.toISOString().slice(0,10);
+  }
+  function weekLabel(k) { const d=new Date(k+'T00:00:00'); return (d.getMonth()+1)+'/'+d.getDate(); }
+
+  const wkSet = [];
+  for (let i=7;i>=0;i--) { const d=new Date(); d.setDate(d.getDate()-i*7); const k=getWeekKey(d.toISOString().slice(0,10)); if(!wkSet.includes(k)) wkSet.push(k); }
+
+  const wJobs={},wDrive={},wInst={},wMeal={},wLft={},wPerg={},wTot={},wN={};
+  wkSet.forEach(w=>{wJobs[w]=0;wDrive[w]=0;wInst[w]=0;wMeal[w]=0;wLft[w]=0;wPerg[w]=0;wTot[w]=0;wN[w]=0;});
+
+  all.forEach(j=>{
+    const w=getWeekKey(j.date);
+    if(wJobs[w]===undefined) return;
+    wJobs[w]++; wDrive[w]+=(j.total_drive_hrs||0); wInst[w]+=(j.total_install_hrs||0);
+    wMeal[w]+=(j.total_meal_hrs||0); wLft[w]+=(parseFloat(j.lin_ft)||0);
+    if(j.pergola==='Yes') wPerg[w]++;
+    if(j.total_hrs){wTot[w]+=j.total_hrs;wN[w]++;}
+  });
+
+  const wLabels=wkSet.map(w=>'Wk '+weekLabel(w));
+  const tw=getWeekKey(new Date().toISOString().slice(0,10));
+  document.getElementById('week-metrics').innerHTML=`
+    <div class="metric blue"><div class="metric-label">Jobs this week</div><div class="metric-value">${wJobs[tw]||0}</div></div>
+    <div class="metric green"><div class="metric-label">Install hrs this week</div><div class="metric-value">${(wInst[tw]||0).toFixed(1)}</div></div>
+    <div class="metric"><div class="metric-label">Drive hrs this week</div><div class="metric-value">${(wDrive[tw]||0).toFixed(1)}</div></div>
+    <div class="metric amber"><div class="metric-label">Lin. ft this week</div><div class="metric-value">${(wLft[tw]||0).toFixed(0)}</div></div>`;
+
+  killChart('wjobs');
+  chartMap['wjobs']=new Chart(document.getElementById('ch-wjobs'),{type:'bar',data:{labels:wLabels,datasets:[{data:wkSet.map(w=>wJobs[w]),backgroundColor:'#2563eb',borderRadius:4,label:'Jobs'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}});
+
+  killChart('whrs');
+  chartMap['whrs']=new Chart(document.getElementById('ch-whrs'),{type:'bar',data:{labels:wLabels,datasets:[{data:wkSet.map(w=>parseFloat(wDrive[w].toFixed(2))),label:'Drive',backgroundColor:'#2563eb',borderRadius:2},{data:wkSet.map(w=>parseFloat(wInst[w].toFixed(2))),label:'Install',backgroundColor:'#15803d',borderRadius:2},{data:wkSet.map(w=>parseFloat(wMeal[w].toFixed(2))),label:'Meal',backgroundColor:'#d97706',borderRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:10}}},scales:{x:{stacked:true,ticks:{font:{size:10}},grid:{display:false}},y:{stacked:true,beginAtZero:true,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}}}}});
+
+  killChart('wlinft');
+  chartMap['wlinft']=new Chart(document.getElementById('ch-wlinft'),{type:'bar',data:{labels:wLabels,datasets:[{data:wkSet.map(w=>parseFloat(wLft[w].toFixed(1))),backgroundColor:'rgba(37,99,235,0.5)',borderColor:'#2563eb',borderWidth:1,borderRadius:3,label:'Lin ft'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}});
+
+  killChart('wpergola');
+  chartMap['wpergola']=new Chart(document.getElementById('ch-wpergola'),{type:'bar',data:{labels:wLabels,datasets:[{data:wkSet.map(w=>wPerg[w]),backgroundColor:'#d97706',borderRadius:4,label:'Pergola'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}});
+
+  killChart('wavg');
+  chartMap['wavg']=new Chart(document.getElementById('ch-wavg'),{type:'line',data:{labels:wLabels,datasets:[{data:wkSet.map(w=>wN[w]?parseFloat((wTot[w]/wN[w]).toFixed(2)):0),borderColor:'#7c3aed',backgroundColor:'rgba(124,58,237,0.06)',tension:0.4,fill:true,pointRadius:3,pointBackgroundColor:'#7c3aed',label:'Avg hrs'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}});
+
+  // Crew breakdown
+  const crewMap={};
+  all.forEach(j=>{ if(!j.crew) return; j.crew.split(',').forEach(n=>{const nm=n.trim();if(nm) crewMap[nm]=(crewMap[nm]||0)+1;}); });
+  const cNames=Object.keys(crewMap).sort((a,b)=>crewMap[b]-crewMap[a]);
+  const cColors=['#2563eb','#15803d','#d97706','#7c3aed','#dc2626','#0891b2','#65a30d','#db2777','#ea580c','#6366f1'];
+  killChart('crew');
+  chartMap['crew']=new Chart(document.getElementById('ch-crew'),{type:'bar',data:{labels:cNames,datasets:[{data:cNames.map(n=>crewMap[n]),backgroundColor:cColors.slice(0,cNames.length),borderRadius:4,label:'Jobs'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}});
+
+  killChart('breakdown');
+  chartMap['breakdown'] = new Chart(document.getElementById('ch-breakdown'),{
+    type:'bar',
+    data:{
+      labels:['Drive there','Install AM','Meal break','Install PM','Drive back'],
+      datasets:[{
+        data:[
+          parseFloat((all.reduce((s,j)=>s+(j.drive1_hrs||0),0)/(total||1)).toFixed(2)),
+          parseFloat((all.reduce((s,j)=>s+(j.install1_hrs||0),0)/(total||1)).toFixed(2)),
+          parseFloat((all.reduce((s,j)=>s+(j.meal_hrs||0),0)/(total||1)).toFixed(2)),
+          parseFloat((all.reduce((s,j)=>s+(j.install2_hrs||0),0)/(total||1)).toFixed(2)),
+          parseFloat((all.reduce((s,j)=>s+(j.drive2_hrs||0),0)/(total||1)).toFixed(2)),
+        ],
+        backgroundColor:['#2563eb','#15803d','#d97706','#166534','#4338ca'],
+        borderRadius:4,label:'Avg hrs'
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:10}}}}}
+  });
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(()=>t.className='toast',3000);
+}
+
+init();
+</script>
+</body>
+</html>
