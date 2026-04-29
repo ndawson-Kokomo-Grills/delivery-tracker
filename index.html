@@ -945,18 +945,8 @@ function toggleJobTypeFields() {
   // Try wrapper divs first
   const ts = document.getElementById('time-standard');
   const th = document.getElementById('time-homeshow');
-  if (ts) {
-    ts.style.display = isHomeshow ? 'none' : '';
-    console.log('time-standard set to:', ts.style.display);
-  } else {
-    console.log('time-standard NOT FOUND');
-  }
-  if (th) {
-    th.style.display = isHomeshow ? '' : 'none';
-    console.log('time-homeshow set to:', th.style.display);
-  } else {
-    console.log('time-homeshow NOT FOUND');
-  }
+  if (ts) ts.style.display = isHomeshow ? 'none' : 'block';
+  if (th) th.style.display = isHomeshow ? 'block' : 'none';
 }
 
 // Attach to the dropdown
