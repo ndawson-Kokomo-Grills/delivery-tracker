@@ -936,15 +936,27 @@ function toggleJobTypeFields() {
   const isIsland = v === 'Delivery' || v === 'Grill Install';
   const isHomeshow = v === 'Homeshow';
   
+  // Island fields
   const lf = document.getElementById('linft-field');
   const pg = document.getElementById('pergola-field');
-  const ts = document.getElementById('time-standard');
-  const th = document.getElementById('time-homeshow');
-  
   if (lf) lf.style.display = isIsland ? '' : 'none';
   if (pg) pg.style.display = isDelivery ? '' : 'none';
-  if (ts) ts.style.display = isHomeshow ? 'none' : '';
-  if (th) th.style.display = isHomeshow ? '' : 'none';
+  
+  // Try wrapper divs first
+  const ts = document.getElementById('time-standard');
+  const th = document.getElementById('time-homeshow');
+  if (ts) {
+    ts.style.display = isHomeshow ? 'none' : '';
+    console.log('time-standard set to:', ts.style.display);
+  } else {
+    console.log('time-standard NOT FOUND');
+  }
+  if (th) {
+    th.style.display = isHomeshow ? '' : 'none';
+    console.log('time-homeshow set to:', th.style.display);
+  } else {
+    console.log('time-homeshow NOT FOUND');
+  }
 }
 
 // Attach to the dropdown
@@ -1058,6 +1070,10 @@ function toggleIslandFieldsN(n) {
 }
 
 init();
+window.addEventListener('load', function() {
+  // Ensure toggle runs after full page render
+  setTimeout(toggleJobTypeFields, 100);
+});
 </script>
 </body>
 </html>
