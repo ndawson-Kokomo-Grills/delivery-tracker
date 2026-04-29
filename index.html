@@ -248,6 +248,7 @@
       </div>
 
       <!-- DRIVE THERE -->
+      <div id="time-standard">
       <div class="section-banner banner-drive">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
         Drive to job site
@@ -345,6 +346,48 @@
         <div class="field full">
           <label>Notes</label>
           <input type="text" id="f-notes" placeholder="Any additional notes...">
+        </div>
+      </div>
+
+      </div>
+      <div id="time-homeshow" style="display:none">
+        <div class="section-banner banner-drive">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          Drive to homeshow
+        </div>
+        <div class="form-grid">
+          <div class="field third"><label>Depart shop</label><input type="time" id="f-hsd1-start" oninput="calcHrs('hsd1')"></div>
+          <div class="field third"><label>Arrive homeshow</label><div class="time-row"><input type="time" id="f-hsd1-end" oninput="calcHrs('hsd1')"><span class="hrs-pill" id="hsd1-pill">— hrs</span></div></div>
+        </div>
+        <div class="section-banner" style="background:#f5f3ff;color:#6d28d9;border-left:3px solid #7c3aed;margin:1rem 0 0.75rem;display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--radius);font-size:0.8rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase">
+          🏠 Homeshow setup
+        </div>
+        <div class="form-grid">
+          <div class="field third"><label>Start</label><input type="time" id="f-hssetup-start" oninput="calcHrs('hssetup')"></div>
+          <div class="field third"><label>End</label><div class="time-row"><input type="time" id="f-hssetup-end" oninput="calcHrs('hssetup')"><span class="hrs-pill" id="hssetup-pill">— hrs</span></div></div>
+        </div>
+        <div class="section-banner banner-meal" style="margin-top:0.5rem">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+          Meal break
+        </div>
+        <div class="form-grid">
+          <div class="field third"><label>Start</label><input type="time" id="f-hsmb-start" oninput="calcHrs('hsmb')"></div>
+          <div class="field third"><label>End</label><div class="time-row"><input type="time" id="f-hsmb-end" oninput="calcHrs('hsmb')"><span class="hrs-pill" id="hsmb-pill">— hrs</span></div></div>
+        </div>
+        <div class="section-banner" style="background:#fef2f2;color:#dc2626;border-left:3px solid #dc2626;margin-top:0.5rem;display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--radius);font-size:0.8rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase">
+          🏠 Homeshow teardown
+        </div>
+        <div class="form-grid">
+          <div class="field third"><label>Start</label><input type="time" id="f-hstear-start" oninput="calcHrs('hstear')"></div>
+          <div class="field third"><label>End</label><div class="time-row"><input type="time" id="f-hstear-end" oninput="calcHrs('hstear')"><span class="hrs-pill" id="hstear-pill">— hrs</span></div></div>
+        </div>
+        <div class="section-banner banner-drive2" style="margin-top:0.5rem">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          Drive back to shop
+        </div>
+        <div class="form-grid">
+          <div class="field third"><label>Depart homeshow</label><input type="time" id="f-hsd2-start" oninput="calcHrs('hsd2')"></div>
+          <div class="field third"><label>Arrive shop</label><div class="time-row"><input type="time" id="f-hsd2-end" oninput="calcHrs('hsd2')"><span class="hrs-pill" id="hsd2-pill">— hrs</span></div></div>
         </div>
       </div>
       </div><!-- /stop-1 -->
@@ -529,11 +572,17 @@ function updateTotalPreview() {
   }
 }
 function toggleIslandFields() {
-  const v = document.getElementById('f-jobtype').value;
-  const show = v === 'Delivery' || v === 'Grill Install';
-  document.getElementById('linft-field').style.display = show ? '' : 'none';
-  document.getElementById('pergola-field').style.display = show ? '' : 'none';
-}
+    const v = document.getElementById('f-jobtype').value;
+    const showLinFt = v === 'Delivery' || v === 'Grill Install';
+    const showPergola = v === 'Delivery';
+    document.getElementById('linft-field').style.display = showLinFt ? '' : 'none';
+    document.getElementById('pergola-field').style.display = showPergola ? '' : 'none';
+    const isHomeshow = v === 'Homeshow';
+    const ts = document.getElementById('time-standard');
+    const th = document.getElementById('time-homeshow');
+    if (ts) ts.style.display = isHomeshow ? 'none' : '';
+    if (th) th.style.display = isHomeshow ? '' : 'none';
+  }
 
 // ── SAVE JOB ──────────────────────────────────────────────────────────────────
 async function saveJob() {
@@ -548,7 +597,8 @@ async function saveJob() {
   const cust1 = document.getElementById('f-customer').value.trim();
   const type1 = document.getElementById('f-jobtype').value;
   if (!cust1 || !type1) { showToast('Please fill in customer and job type for Job #1.', 'error'); return; }
-  const d1h = getHrs('d1'), i1h = getHrs('i1'), mbh = getHrs('mb'), i2h = getHrs('i2'), d2h = getHrs('d2');
+  const isHomeshow1 = document.getElementById('f-jobtype').value === 'Homeshow';
+  const d1h = isHomeshow1?getHrs('hsd1'):getHrs('d1'), i1h = isHomeshow1?getHrs('hssetup'):getHrs('i1'), mbh = isHomeshow1?getHrs('hsmb'):getHrs('mb'), i2h = isHomeshow1?getHrs('hstear'):getHrs('i2'), d2h = isHomeshow1?getHrs('hsd2'):getHrs('d2');
   const driveHrs = (d1h||0)+(d2h||0), installHrs = (i1h||0)+(i2h||0), mealHrs = mbh||0;
   jobs.push({
     date, crew,
@@ -674,7 +724,7 @@ function renderHistoryTable(jobs) {
       <td><div style="font-weight:600;font-size:0.82rem">${j.customer}</div><div style="font-size:0.72rem;color:var(--gray-400)">${j.address||''}</div></td>
       <td style="font-size:0.78rem">${j.so_number||'—'}</td>
       <td style="font-size:0.78rem;max-width:120px">${j.crew||'—'}</td>
-      <td>${tagHtml(j.job_type)}${j.pergola==='Yes'?'<span class="tag tag-pergola" style="margin-left:3px">Pergola</span>':''}</td>
+      <td>${tagHtml(j.job_type)}${j.pergola==='Yes'&&j.job_type==='Delivery'?'<span class="tag tag-pergola" style="margin-left:3px">Pergola</span>':''}</td>
       <td>${j.lin_ft != null ? parseFloat(j.lin_ft).toFixed(1) : '—'}</td>
       <td class="time-cell"><div class="start-end">${fmtTime(j.drive1_start)} – ${fmtTime(j.drive1_end)}</div><div class="hrs" style="color:var(--blue)">${j.drive1_hrs!=null?j.drive1_hrs.toFixed(2)+' hrs':'—'}</div></td>
       <td class="time-cell"><div class="start-end">${fmtTime(j.install1_start)} – ${fmtTime(j.install1_end)}</div><div class="hrs" style="color:var(--green)">${j.install1_hrs!=null?j.install1_hrs.toFixed(2)+' hrs':'—'}</div></td>
@@ -730,19 +780,28 @@ async function loadDash() {
 
   const total = all.length;
   const totalLinFt = all.reduce((s,j)=>s+(parseFloat(j.lin_ft)||0),0);
-  const pergCount = all.filter(j=>j.pergola==='Yes').length;
-  const avgHrs = total ? (all.reduce((s,j)=>s+(j.total_hrs||0),0)/total) : 0;
-  const avgDrive = total ? (all.reduce((s,j)=>s+(j.total_drive_hrs||0),0)/total) : 0;
-  const avgInst = total ? (all.reduce((s,j)=>s+(j.total_install_hrs||0),0)/total) : 0;
+  const pergCount = all.filter(j=>j.pergola==='Yes'&&j.job_type==='Delivery').length;
 
-  document.getElementById('dash-metrics').innerHTML = `
-    <div class="metric blue"><div class="metric-label">Total jobs</div><div class="metric-value">${total}</div></div>
-    <div class="metric"><div class="metric-label">Avg total hrs / job</div><div class="metric-value">${avgHrs.toFixed(1)}</div></div>
-    <div class="metric green"><div class="metric-label">Avg install hrs / job</div><div class="metric-value">${avgInst.toFixed(1)}</div><div class="metric-sub">Avg drive: ${avgDrive.toFixed(1)} hrs</div></div>
-    <div class="metric amber"><div class="metric-label">Total lin. ft</div><div class="metric-value">${totalLinFt.toFixed(0)}</div><div class="metric-sub">${pergCount} jobs with pergola</div></div>`;
+  // Crew size helper
+  function crewSz(j){ return j.crew ? j.crew.split(',').filter(n=>n.trim()).length : 1; }
 
-  const types = ['Delivery','Grill Install','Service','Boxed Goods'];
-  const typeColors = ['#2563eb','#15803d','#d97706','#7c3aed'];
+  // Man-hour weighted metrics
+  const totalManHrs = all.reduce((s,j)=>s+(j.total_hrs||0)*crewSz(j),0);
+  const totalCrewSlots = all.reduce((s,j)=>s+crewSz(j),0);
+  const avgManHrsPerSlot = totalCrewSlots ? totalManHrs/totalCrewSlots : 0;
+  const avgInstManHrs = totalCrewSlots ? all.reduce((s,j)=>s+(j.total_install_hrs||0)*crewSz(j),0)/totalCrewSlots : 0;
+  const avgDriveManHrs = totalCrewSlots ? all.reduce((s,j)=>s+(j.total_drive_hrs||0)*crewSz(j),0)/totalCrewSlots : 0;
+  const avgInst = total ? all.reduce((s,j)=>s+(j.total_install_hrs||0),0)/total : 0;
+  const avgDrive = total ? all.reduce((s,j)=>s+(j.total_drive_hrs||0),0)/total : 0;
+
+  document.getElementById('dash-metrics').innerHTML=`
+    <div class="metric blue"><div class="metric-label">Total jobs</div><div class="metric-value">${total}</div><div class="metric-sub">${totalCrewSlots} total crew assignments</div></div>
+    <div class="metric"><div class="metric-label">Avg man-hrs / crew member</div><div class="metric-value">${avgManHrsPerSlot.toFixed(1)}</div><div class="metric-sub">per job assigned</div></div>
+    <div class="metric green"><div class="metric-label">Avg install man-hrs</div><div class="metric-value">${avgInstManHrs.toFixed(1)}</div><div class="metric-sub">Avg drive man-hrs: ${avgDriveManHrs.toFixed(1)}</div></div>
+    <div class="metric amber"><div class="metric-label">Total lin. ft</div><div class="metric-value">${totalLinFt.toFixed(0)}</div><div class="metric-sub">${pergCount} island jobs with pergola</div></div>`;
+
+  const types = ['Delivery','Grill Install','Service','Boxed Goods','Homeshow'];
+  const typeColors = ['#2563eb','#15803d','#d97706','#7c3aed','#db2777'];
   const typeCounts = types.map(t => all.filter(j=>j.job_type===t).length);
   const typeInstHrs = types.map(t => {
     const jobs = all.filter(j=>j.job_type===t&&j.total_install_hrs!=null);
@@ -968,11 +1027,17 @@ function getStopHrs(key, n) {
 
 function toggleIslandFieldsN(n) {
   const v = document.getElementById('f-jobtype-' + n) ? document.getElementById('f-jobtype-' + n).value : '';
-  const show = v === 'Delivery' || v === 'Grill Install';
+  const showLinFt = v === 'Delivery' || v === 'Grill Install';
+  const showPergola = v === 'Delivery';
   const lf = document.getElementById('linft-field-' + n);
   const pg = document.getElementById('pergola-field-' + n);
-  if (lf) lf.style.display = show ? '' : 'none';
-  if (pg) pg.style.display = show ? '' : 'none';
+  if (lf) lf.style.display = showLinFt ? '' : 'none';
+  if (pg) pg.style.display = showPergola ? '' : 'none';
+  // homeshow time sections for additional stops
+  const stdN = document.getElementById('time-standard-' + n);
+  const hsN = document.getElementById('time-homeshow-' + n);
+  if (stdN) stdN.style.display = v === 'Homeshow' ? 'none' : '';
+  if (hsN) hsN.style.display = v === 'Homeshow' ? '' : 'none';
 }
 
 init();
