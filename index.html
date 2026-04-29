@@ -161,6 +161,11 @@
   .config-card h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--gray-900); }
   .config-card p { font-size: 0.85rem; color: var(--gray-500); margin-bottom: 1.25rem; line-height: 1.6; }
   .config-card code { background: var(--gray-100); padding: 1px 5px; border-radius: 4px; font-family: monospace; font-size: 0.8rem; }
+
+  #time-homeshow { display: none; }
+  #time-standard.hidden { display: none; }
+  #time-homeshow.visible { display: block; }
+
 </style>
 </head>
 <body>
@@ -339,7 +344,7 @@
         </div>
       </div>
 
-      <div id="time-homeshow" style="display:none">
+      <div id="time-homeshow">
         <div class="section-banner banner-drive">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
           Drive to homeshow
@@ -936,17 +941,15 @@ function toggleJobTypeFields() {
   const isIsland = v === 'Delivery' || v === 'Grill Install';
   const isHomeshow = v === 'Homeshow';
   
-  // Island fields
   const lf = document.getElementById('linft-field');
   const pg = document.getElementById('pergola-field');
   if (lf) lf.style.display = isIsland ? '' : 'none';
   if (pg) pg.style.display = isDelivery ? '' : 'none';
   
-  // Try wrapper divs first
   const ts = document.getElementById('time-standard');
   const th = document.getElementById('time-homeshow');
-  if (ts) ts.style.display = isHomeshow ? 'none' : 'block';
-  if (th) th.style.display = isHomeshow ? 'block' : 'none';
+  if (ts) { ts.style.cssText = isHomeshow ? 'display:none!important' : 'display:block!important'; }
+  if (th) { th.style.cssText = isHomeshow ? 'display:block!important' : 'display:none!important'; }
 }
 
 // Attach to the dropdown
