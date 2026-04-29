@@ -202,7 +202,7 @@
         </div>
         <div class="field third">
           <label>Job type</label>
-          <select id="f-jobtype" onchange="toggleIslandFields()">
+          <select id="f-jobtype" onchange="toggleJobTypeFields()">
             <option value="">— select —</option>
             <option>Delivery</option>
             <option>Grill Install</option>
@@ -507,6 +507,7 @@ async function init() {
     showToast('Database connection failed. Check your credentials.', 'error');
   }
   await refreshCrewDl();
+  toggleJobTypeFields();
 }
 
 function setDbStatus(ok, text) {
@@ -947,10 +948,7 @@ function toggleJobTypeFields() {
 }
 
 // Attach to the dropdown
-document.addEventListener('DOMContentLoaded', function() {
-  const sel = document.getElementById('f-jobtype');
-  if (sel) sel.addEventListener('change', toggleJobTypeFields);
-});
+// toggleJobTypeFields called from init and onchange
 
 // Also call on change via inline onchange (belt and suspenders)
 window.toggleIslandFields = toggleJobTypeFields;
