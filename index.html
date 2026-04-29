@@ -938,18 +938,19 @@ function getHrsHS(section) {
 function toggleJobTypeFields() {
   const v = document.getElementById('f-jobtype').value;
   const isDelivery = v === 'Delivery';
-  const isIsland = v === 'Delivery' || v === 'Grill Install';
   const isHomeshow = v === 'Homeshow';
   
+  // Lin ft and pergola: Delivery only
   const lf = document.getElementById('linft-field');
   const pg = document.getElementById('pergola-field');
-  if (lf) lf.style.display = isIsland ? '' : 'none';
-  if (pg) pg.style.display = isDelivery ? '' : 'none';
+  if (lf) lf.style.cssText = isDelivery ? 'display:block!important' : 'display:none!important';
+  if (pg) pg.style.cssText = isDelivery ? 'display:block!important' : 'display:none!important';
   
+  // Time sections: standard for all non-homeshow, homeshow sections for homeshow
   const ts = document.getElementById('time-standard');
   const th = document.getElementById('time-homeshow');
-  if (ts) { ts.style.cssText = isHomeshow ? 'display:none!important' : 'display:block!important'; }
-  if (th) { th.style.cssText = isHomeshow ? 'display:block!important' : 'display:none!important'; }
+  if (ts) ts.style.cssText = isHomeshow ? 'display:none!important' : 'display:block!important';
+  if (th) th.style.cssText = isHomeshow ? 'display:block!important' : 'display:none!important';
 }
 
 // Attach to the dropdown
