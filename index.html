@@ -671,6 +671,7 @@ async function saveJob() {
     total_drive_hrs: driveHrs||null, total_install_hrs: installHrs||null,
     total_meal_hrs: mealHrs||null, total_hrs: (driveHrs+installHrs+mealHrs)||null,
     notes: document.getElementById('f-notes').value.trim()||null,
+    crew_count: document.getElementById('f-crew').value.trim() ? document.getElementById('f-crew').value.trim().split(',').filter(n=>n.trim()).length : 1,
   }];
 
   // Additional stops
@@ -698,6 +699,7 @@ async function saveJob() {
         total_drive_hrs:nd2||null,total_install_hrs:(ni1||0)+(ni2||0)||null,
         total_meal_hrs:nmb||null,total_hrs:((nd2||0)+(ni1||0)+(ni2||0)+(nmb||0))||null,
         notes:(document.getElementById('f-notes-'+n)||{}).value||null,
+        crew_count: document.getElementById('f-crew').value.trim() ? document.getElementById('f-crew').value.trim().split(',').filter(n=>n.trim()).length : 1,
       });
     }
     n++;
@@ -868,7 +870,7 @@ async function loadDash() {
 
 
   // ── CREW SIZE ─────────────────────────────────────────────────────────────
-  function crewSz(j){return j.crew?j.crew.split(',').filter(n=>n.trim()).length:1;}
+  function crewSz(j){return j.crew_count || (j.crew?j.crew.split(',').filter(n=>n.trim()).length:1);}
   const totalManHrs=all.reduce((s,j)=>s+(j.total_hrs||0)*crewSz(j),0);
   const totalCrewSlots=all.reduce((s,j)=>s+crewSz(j),0);
   const avgMH=totalCrewSlots?totalManHrs/totalCrewSlots:0;
@@ -1163,6 +1165,7 @@ async function saveHomeshow() {
     total_drive_hrs:driveHrs||null,total_install_hrs:installHrs||null,
     total_meal_hrs:mealHrs||null,total_hrs:(driveHrs+installHrs+mealHrs)||null,
     notes:document.getElementById('hs-notes').value.trim()||null,
+    crew_count: document.getElementById('hs-crew').value.trim() ? document.getElementById('hs-crew').value.trim().split(',').filter(n=>n.trim()).length : 1,
   };
   const{error}=await sbClient.from('jobs').insert([job]);
   if(error){showToast('Error: '+error.message,'error');return;}
@@ -1202,4 +1205,3 @@ window.addEventListener('load', function() {
 </script>
 </body>
 </html>
-
