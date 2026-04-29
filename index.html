@@ -194,13 +194,8 @@
   <!-- LOG JOB -->
   <div id="screen-log" class="screen active">
     <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-        <div class="card-title" style="margin:0">Day Entry</div>
-        <button class="btn btn-secondary btn-sm" onclick="addJobStop()">+ Add another job</button>
-      </div>
-      <div id="job-stops">
-      <div class="job-stop" id="stop-1">
-      <div style="padding:8px 12px;background:var(--blue-light);border-radius:var(--radius);border-left:3px solid var(--blue);margin-bottom:0.75rem;font-size:0.8rem;font-weight:600;color:var(--blue)">Job #1</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem"><div class="card-title" style="margin:0">Day Entry</div><button class="btn btn-secondary btn-sm" onclick="addJobStop()">+ Add another job</button></div>
+      <div id="job-stops"><div class="job-stop" id="stop-1"><div style="padding:8px 12px;background:var(--blue-light);border-radius:var(--radius);border-left:3px solid var(--blue);margin-bottom:0.75rem;font-size:0.8rem;font-weight:600;color:var(--blue)">Job #1</div>
       <div class="form-grid">
         <div class="field third">
           <label>Date</label>
@@ -343,13 +338,8 @@
             <span class="hrs-pill" id="d2-pill">— hrs</span>
           </div>
         </div>
-        <div class="field full">
-          <label>Notes</label>
-          <input type="text" id="f-notes" placeholder="Any additional notes...">
-        </div>
       </div>
 
-      </div>
       <div id="time-homeshow" style="display:none">
         <div class="section-banner banner-drive">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
@@ -359,14 +349,14 @@
           <div class="field third"><label>Depart shop</label><input type="time" id="f-hsd1-start" oninput="calcHrs('hsd1')"></div>
           <div class="field third"><label>Arrive homeshow</label><div class="time-row"><input type="time" id="f-hsd1-end" oninput="calcHrs('hsd1')"><span class="hrs-pill" id="hsd1-pill">— hrs</span></div></div>
         </div>
-        <div class="section-banner" style="background:#f5f3ff;color:#6d28d9;border-left:3px solid #7c3aed;margin:1rem 0 0.75rem;display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--radius);font-size:0.8rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase">
+        <div class="section-banner" style="background:#f5f3ff;color:#6d28d9;border-left:3px solid #7c3aed;display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--radius);font-size:0.8rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;margin:1rem 0 0.75rem">
           🏠 Homeshow setup
         </div>
         <div class="form-grid">
           <div class="field third"><label>Start</label><input type="time" id="f-hssetup-start" oninput="calcHrs('hssetup')"></div>
           <div class="field third"><label>End</label><div class="time-row"><input type="time" id="f-hssetup-end" oninput="calcHrs('hssetup')"><span class="hrs-pill" id="hssetup-pill">— hrs</span></div></div>
         </div>
-        <div class="section-banner banner-meal" style="margin-top:0.5rem">
+        <div class="section-banner banner-meal">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
           Meal break
         </div>
@@ -374,14 +364,14 @@
           <div class="field third"><label>Start</label><input type="time" id="f-hsmb-start" oninput="calcHrs('hsmb')"></div>
           <div class="field third"><label>End</label><div class="time-row"><input type="time" id="f-hsmb-end" oninput="calcHrs('hsmb')"><span class="hrs-pill" id="hsmb-pill">— hrs</span></div></div>
         </div>
-        <div class="section-banner" style="background:#fef2f2;color:#dc2626;border-left:3px solid #dc2626;margin-top:0.5rem;display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--radius);font-size:0.8rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase">
+        <div class="section-banner" style="background:#fef2f2;color:#dc2626;border-left:3px solid #dc2626;display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--radius);font-size:0.8rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;margin:0.5rem 0 0.75rem">
           🏠 Homeshow teardown
         </div>
         <div class="form-grid">
           <div class="field third"><label>Start</label><input type="time" id="f-hstear-start" oninput="calcHrs('hstear')"></div>
           <div class="field third"><label>End</label><div class="time-row"><input type="time" id="f-hstear-end" oninput="calcHrs('hstear')"><span class="hrs-pill" id="hstear-pill">— hrs</span></div></div>
         </div>
-        <div class="section-banner banner-drive2" style="margin-top:0.5rem">
+        <div class="section-banner banner-drive2">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
           Drive back to shop
         </div>
@@ -390,10 +380,14 @@
           <div class="field third"><label>Arrive shop</label><div class="time-row"><input type="time" id="f-hsd2-end" oninput="calcHrs('hsd2')"><span class="hrs-pill" id="hsd2-pill">— hrs</span></div></div>
         </div>
       </div>
+
+        <div class="field full">
+          <label>Notes</label>
+          <input type="text" id="f-notes" placeholder="Any additional notes...">
+        </div>
+      </div>
       </div><!-- /stop-1 -->
       </div><!-- /job-stops -->
-
-      <div style="display:flex;align-items:center;gap:12px;margin-top:4px">
         <button class="btn btn-primary" onclick="saveJob()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
           Save Job
@@ -473,7 +467,7 @@
     <div class="metrics-grid" id="island-metrics" style="margin-bottom:1rem"></div>
     <div class="dash-row">
       <div class="card"><div class="chart-title">Avg install time by linear ft range</div><div style="position:relative;height:200px"><canvas id="ch-linft-range"></canvas></div></div>
-      <div class="card"><div class="chart-title">Install time — pergola vs no pergola</div><div style="position:relative;height:200px"><canvas id="ch-pergola-compare"></canvas></div></div>
+      <div class="card"><div class="chart-title">Install time — with vs without pergola</div><div style="position:relative;height:200px"><canvas id="ch-pergola-compare"></canvas></div></div>
     </div>
     <div class="card" style="margin-bottom:1rem"><div class="chart-title">Install time vs linear feet (scatter)</div><div style="position:relative;height:220px"><canvas id="ch-scatter"></canvas></div></div>
   </div>
@@ -572,17 +566,11 @@ function updateTotalPreview() {
   }
 }
 function toggleIslandFields() {
-    const v = document.getElementById('f-jobtype').value;
-    const showLinFt = v === 'Delivery' || v === 'Grill Install';
-    const showPergola = v === 'Delivery';
-    document.getElementById('linft-field').style.display = showLinFt ? '' : 'none';
-    document.getElementById('pergola-field').style.display = showPergola ? '' : 'none';
-    const isHomeshow = v === 'Homeshow';
-    const ts = document.getElementById('time-standard');
-    const th = document.getElementById('time-homeshow');
-    if (ts) ts.style.display = isHomeshow ? 'none' : '';
-    if (th) th.style.display = isHomeshow ? '' : 'none';
-  }
+  const v = document.getElementById('f-jobtype').value;
+  const show = v === 'Delivery' || v === 'Grill Install';
+  document.getElementById('linft-field').style.display = show ? '' : 'none';
+  document.getElementById('pergola-field').style.display = show ? '' : 'none';
+}
 
 // ── SAVE JOB ──────────────────────────────────────────────────────────────────
 async function saveJob() {
@@ -590,99 +578,89 @@ async function saveJob() {
   const date = document.getElementById('f-date').value;
   const crew = document.getElementById('f-crew').value.trim();
   if (!date) { showToast('Please enter a date.', 'error'); return; }
-
-  const jobs = [];
-
-  // Job #1 — full time tracking
   const cust1 = document.getElementById('f-customer').value.trim();
   const type1 = document.getElementById('f-jobtype').value;
   if (!cust1 || !type1) { showToast('Please fill in customer and job type for Job #1.', 'error'); return; }
-  const isHomeshow1 = document.getElementById('f-jobtype').value === 'Homeshow';
-  const d1h = isHomeshow1?getHrs('hsd1'):getHrs('d1'), i1h = isHomeshow1?getHrs('hssetup'):getHrs('i1'), mbh = isHomeshow1?getHrs('hsmb'):getHrs('mb'), i2h = isHomeshow1?getHrs('hstear'):getHrs('i2'), d2h = isHomeshow1?getHrs('hsd2'):getHrs('d2');
-  const driveHrs = (d1h||0)+(d2h||0), installHrs = (i1h||0)+(i2h||0), mealHrs = mbh||0;
-  jobs.push({
-    date, crew,
-    customer: cust1,
-    so_number: document.getElementById('f-so').value.trim() || null,
+
+  const isHS = type1 === 'Homeshow';
+  const d1h = isHS ? getHrsHS('hsd1') : getHrs('d1');
+  const i1h = isHS ? getHrsHS('hssetup') : getHrs('i1');
+  const mbh = isHS ? getHrsHS('hsmb') : getHrs('mb');
+  const i2h = isHS ? getHrsHS('hstear') : getHrs('i2');
+  const d2h = isHS ? getHrsHS('hsd2') : getHrs('d2');
+  const driveHrs=(d1h||0)+(d2h||0), installHrs=(i1h||0)+(i2h||0), mealHrs=mbh||0;
+
+  const jobs = [{
+    date, crew, customer: cust1,
+    so_number: document.getElementById('f-so').value.trim()||null,
     address: document.getElementById('f-address').value.trim(),
     job_type: type1,
     lin_ft: parseFloat(document.getElementById('f-linft').value)||null,
-    pergola: document.getElementById('f-pergola').value||'No',
-    drive1_start: document.getElementById('f-d1-start').value||null,
-    drive1_end: document.getElementById('f-d1-end').value||null,
+    pergola: type1==='Delivery' ? (document.getElementById('f-pergola').value||'No') : 'No',
+    drive1_start: isHS?(document.getElementById('f-hsd1-start').value||null):(document.getElementById('f-d1-start').value||null),
+    drive1_end: isHS?(document.getElementById('f-hsd1-end').value||null):(document.getElementById('f-d1-end').value||null),
     drive1_hrs: d1h,
-    install1_start: document.getElementById('f-i1-start').value||null,
-    install1_end: document.getElementById('f-i1-end').value||null,
+    install1_start: isHS?(document.getElementById('f-hssetup-start').value||null):(document.getElementById('f-i1-start').value||null),
+    install1_end: isHS?(document.getElementById('f-hssetup-end').value||null):(document.getElementById('f-i1-end').value||null),
     install1_hrs: i1h,
-    meal_start: document.getElementById('f-mb-start').value||null,
-    meal_end: document.getElementById('f-mb-end').value||null,
+    meal_start: isHS?(document.getElementById('f-hsmb-start').value||null):(document.getElementById('f-mb-start').value||null),
+    meal_end: isHS?(document.getElementById('f-hsmb-end').value||null):(document.getElementById('f-mb-end').value||null),
     meal_hrs: mbh,
-    install2_start: document.getElementById('f-i2-start').value||null,
-    install2_end: document.getElementById('f-i2-end').value||null,
+    install2_start: isHS?(document.getElementById('f-hstear-start').value||null):(document.getElementById('f-i2-start').value||null),
+    install2_end: isHS?(document.getElementById('f-hstear-end').value||null):(document.getElementById('f-i2-end').value||null),
     install2_hrs: i2h,
-    drive2_start: document.getElementById('f-d2-start').value||null,
-    drive2_end: document.getElementById('f-d2-end').value||null,
+    drive2_start: isHS?(document.getElementById('f-hsd2-start').value||null):(document.getElementById('f-d2-start').value||null),
+    drive2_end: isHS?(document.getElementById('f-hsd2-end').value||null):(document.getElementById('f-d2-end').value||null),
     drive2_hrs: d2h,
-    total_drive_hrs: driveHrs||null,
-    total_install_hrs: installHrs||null,
-    total_meal_hrs: mealHrs||null,
-    total_hrs: (driveHrs+installHrs+mealHrs)||null,
+    total_drive_hrs: driveHrs||null, total_install_hrs: installHrs||null,
+    total_meal_hrs: mealHrs||null, total_hrs: (driveHrs+installHrs+mealHrs)||null,
     notes: document.getElementById('f-notes').value.trim()||null,
-  });
+  }];
 
-  // Additional job stops
-  let n = 2;
-  while (document.getElementById('stop-' + n)) {
-    const custEl = document.getElementById('f-customer-' + n);
-    const typeEl = document.getElementById('f-jobtype-' + n);
-    if (custEl && custEl.value.trim()) {
-      const ni1 = getStopHrs('i1', n), nmb = getStopHrs('mb', n), ni2 = getStopHrs('i2', n), nd2 = getStopHrs('d2', n);
-      const nInstall = (ni1||0)+(ni2||0), nMeal = nmb||0, nDrive2 = nd2||0;
+  // Additional stops
+  let n=2;
+  while(document.getElementById('stop-'+n)){
+    const cEl=document.getElementById('f-customer-'+n);
+    if(cEl&&cEl.value.trim()){
+      const ni1=getStopHrs('i1',n),nmb=getStopHrs('mb',n),ni2=getStopHrs('i2',n),nd2=getStopHrs('d2',n);
       jobs.push({
-        date, crew,
-        customer: custEl.value.trim(),
-        so_number: (document.getElementById('f-so-'+n)||{}).value||null,
-        address: (document.getElementById('f-address-'+n)||{}).value||'',
-        job_type: typeEl ? typeEl.value : '',
-        lin_ft: parseFloat((document.getElementById('f-linft-'+n)||{}).value)||null,
-        pergola: (document.getElementById('f-pergola-'+n)||{}).value||'No',
-        drive1_start: null, drive1_end: null, drive1_hrs: null,
-        install1_start: (document.getElementById('f-i1start-'+n)||{}).value||null,
-        install1_end: (document.getElementById('f-i1end-'+n)||{}).value||null,
-        install1_hrs: ni1,
-        meal_start: (document.getElementById('f-mbstart-'+n)||{}).value||null,
-        meal_end: (document.getElementById('f-mbend-'+n)||{}).value||null,
-        meal_hrs: nmb,
-        install2_start: (document.getElementById('f-i2start-'+n)||{}).value||null,
-        install2_end: (document.getElementById('f-i2end-'+n)||{}).value||null,
-        install2_hrs: ni2,
-        drive2_start: (document.getElementById('f-d2start-'+n)||{}).value||null,
-        drive2_end: (document.getElementById('f-d2end-'+n)||{}).value||null,
-        drive2_hrs: nd2,
-        total_drive_hrs: nDrive2||null,
-        total_install_hrs: nInstall||null,
-        total_meal_hrs: nMeal||null,
-        total_hrs: (nDrive2+nInstall+nMeal)||null,
-        notes: (document.getElementById('f-notes-'+n)||{}).value||null,
+        date,crew,customer:cEl.value.trim(),
+        so_number:(document.getElementById('f-so-'+n)||{}).value||null,
+        address:(document.getElementById('f-address-'+n)||{}).value||'',
+        job_type:(document.getElementById('f-jobtype-'+n)||{}).value||'',
+        lin_ft:parseFloat((document.getElementById('f-linft-'+n)||{}).value)||null,
+        pergola:(document.getElementById('f-jobtype-'+n)||{}).value==='Delivery'?((document.getElementById('f-pergola-'+n)||{}).value||'No'):'No',
+        drive1_start:null,drive1_end:null,drive1_hrs:null,
+        install1_start:(document.getElementById('f-i1start-'+n)||{}).value||null,
+        install1_end:(document.getElementById('f-i1end-'+n)||{}).value||null,install1_hrs:ni1,
+        meal_start:(document.getElementById('f-mbstart-'+n)||{}).value||null,
+        meal_end:(document.getElementById('f-mbend-'+n)||{}).value||null,meal_hrs:nmb,
+        install2_start:(document.getElementById('f-i2start-'+n)||{}).value||null,
+        install2_end:(document.getElementById('f-i2end-'+n)||{}).value||null,install2_hrs:ni2,
+        drive2_start:(document.getElementById('f-d2start-'+n)||{}).value||null,
+        drive2_end:(document.getElementById('f-d2end-'+n)||{}).value||null,drive2_hrs:nd2,
+        total_drive_hrs:nd2||null,total_install_hrs:(ni1||0)+(ni2||0)||null,
+        total_meal_hrs:nmb||null,total_hrs:((nd2||0)+(ni1||0)+(ni2||0)+(nmb||0))||null,
+        notes:(document.getElementById('f-notes-'+n)||{}).value||null,
       });
     }
     n++;
   }
 
-  const { error } = await sbClient.from('jobs').insert(jobs);
-  if (error) { showToast('Error saving: ' + error.message, 'error'); return; }
-  showToast(jobs.length + ' job' + (jobs.length>1?'s':'') + ' saved!', 'success');
+  const {error}=await sbClient.from('jobs').insert(jobs);
+  if(error){showToast('Error: '+error.message,'error');return;}
+  showToast(jobs.length+' job'+(jobs.length>1?'s':'')+' saved!','success');
 
-  // Reset form
   ['f-customer','f-so','f-address','f-notes','f-linft'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  ['f-d1-start','f-d1-end','f-i1-start','f-i1-end','f-mb-start','f-mb-end','f-i2-start','f-i2-end','f-d2-start','f-d2-end'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  ['d1','i1','mb','i2','d2'].forEach(k=>{const p=document.getElementById(k+'-pill');if(p){p.textContent='— hrs';p.className='hrs-pill';}});
+  ['f-d1-start','f-d1-end','f-i1-start','f-i1-end','f-mb-start','f-mb-end','f-i2-start','f-i2-end','f-d2-start','f-d2-end',
+   'f-hsd1-start','f-hsd1-end','f-hssetup-start','f-hssetup-end','f-hsmb-start','f-hsmb-end','f-hstear-start','f-hstear-end','f-hsd2-start','f-hsd2-end'
+  ].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['d1','i1','mb','i2','d2','hsd1','hssetup','hsmb','hstear','hsd2'].forEach(k=>{const p=document.getElementById(k+'-pill');if(p){p.textContent='— hrs';p.className='hrs-pill';}});
   document.getElementById('f-jobtype').value='';
   document.getElementById('f-crew').value='';
   document.getElementById('total-preview').textContent='';
-  toggleIslandFields();
-  // Remove extra stops
-  let sn=2; while(document.getElementById('stop-'+sn)){document.getElementById('stop-'+sn).remove();sn++;} stopCount=1;
+  toggleJobTypeFields();
+  let sn=2;while(document.getElementById('stop-'+sn)){document.getElementById('stop-'+sn).remove();sn++;}stopCount=1;
 }
 
 // ── HISTORY ──────────────────────────────────────────────────────────────────
@@ -780,25 +758,8 @@ async function loadDash() {
 
   const total = all.length;
   const totalLinFt = all.reduce((s,j)=>s+(parseFloat(j.lin_ft)||0),0);
-  const pergCount = all.filter(j=>j.pergola==='Yes'&&j.job_type==='Delivery').length;
-
-  // Crew size helper
-  function crewSz(j){ return j.crew ? j.crew.split(',').filter(n=>n.trim()).length : 1; }
-
-  // Man-hour weighted metrics
-  const totalManHrs = all.reduce((s,j)=>s+(j.total_hrs||0)*crewSz(j),0);
-  const totalCrewSlots = all.reduce((s,j)=>s+crewSz(j),0);
-  const avgManHrsPerSlot = totalCrewSlots ? totalManHrs/totalCrewSlots : 0;
-  const avgInstManHrs = totalCrewSlots ? all.reduce((s,j)=>s+(j.total_install_hrs||0)*crewSz(j),0)/totalCrewSlots : 0;
-  const avgDriveManHrs = totalCrewSlots ? all.reduce((s,j)=>s+(j.total_drive_hrs||0)*crewSz(j),0)/totalCrewSlots : 0;
   const avgInst = total ? all.reduce((s,j)=>s+(j.total_install_hrs||0),0)/total : 0;
   const avgDrive = total ? all.reduce((s,j)=>s+(j.total_drive_hrs||0),0)/total : 0;
-
-  document.getElementById('dash-metrics').innerHTML=`
-    <div class="metric blue"><div class="metric-label">Total jobs</div><div class="metric-value">${total}</div><div class="metric-sub">${totalCrewSlots} total crew assignments</div></div>
-    <div class="metric"><div class="metric-label">Avg man-hrs / crew member</div><div class="metric-value">${avgManHrsPerSlot.toFixed(1)}</div><div class="metric-sub">per job assigned</div></div>
-    <div class="metric green"><div class="metric-label">Avg install man-hrs</div><div class="metric-value">${avgInstManHrs.toFixed(1)}</div><div class="metric-sub">Avg drive man-hrs: ${avgDriveManHrs.toFixed(1)}</div></div>
-    <div class="metric amber"><div class="metric-label">Total lin. ft</div><div class="metric-value">${totalLinFt.toFixed(0)}</div><div class="metric-sub">${pergCount} island jobs with pergola</div></div>`;
 
   const types = ['Delivery','Grill Install','Service','Boxed Goods','Homeshow'];
   const typeColors = ['#2563eb','#15803d','#d97706','#7c3aed','#db2777'];
@@ -850,17 +811,27 @@ async function loadDash() {
   });
 
 
-  // ── MAN HOURS METRIC ──────────────────────────────────────────────────────
-  const totalManHrs = all.reduce((s,j)=>{const cc=j.crew?j.crew.split(',').filter(n=>n.trim()).length:1;return s+((j.total_hrs||0)*cc);},0);
-  document.getElementById('dash-metrics').innerHTML += `<div class="metric" style="background:var(--navy);color:white"><div class="metric-label" style="color:#94a3b8">Total man-hours</div><div class="metric-value" style="color:white">${totalManHrs.toFixed(1)}</div><div class="metric-sub" style="color:#94a3b8">hrs × crew size</div></div>`;
+  // ── CREW SIZE ─────────────────────────────────────────────────────────────
+  function crewSz(j){return j.crew?j.crew.split(',').filter(n=>n.trim()).length:1;}
+  const totalManHrs=all.reduce((s,j)=>s+(j.total_hrs||0)*crewSz(j),0);
+  const totalCrewSlots=all.reduce((s,j)=>s+crewSz(j),0);
+  const avgMH=totalCrewSlots?totalManHrs/totalCrewSlots:0;
+  const avgIMH=totalCrewSlots?all.reduce((s,j)=>s+(j.total_install_hrs||0)*crewSz(j),0)/totalCrewSlots:0;
+  const avgDMH=totalCrewSlots?all.reduce((s,j)=>s+(j.total_drive_hrs||0)*crewSz(j),0)/totalCrewSlots:0;
+  const pergCount=all.filter(j=>j.pergola==='Yes'&&j.job_type==='Delivery').length;
+  document.getElementById('dash-metrics').innerHTML=`
+    <div class="metric blue"><div class="metric-label">Total jobs</div><div class="metric-value">${total}</div><div class="metric-sub">${totalCrewSlots} crew assignments</div></div>
+    <div class="metric"><div class="metric-label">Avg man-hrs / crew member</div><div class="metric-value">${avgMH.toFixed(1)}</div></div>
+    <div class="metric green"><div class="metric-label">Avg install man-hrs</div><div class="metric-value">${avgIMH.toFixed(1)}</div><div class="metric-sub">Drive: ${avgDMH.toFixed(1)} man-hrs</div></div>
+    <div class="metric amber"><div class="metric-label">Total lin. ft</div><div class="metric-value">${totalLinFt.toFixed(0)}</div><div class="metric-sub">${pergCount} delivery jobs w/ pergola</div></div>`;
 
-  // ── WEEKLY ────────────────────────────────────────────────────────────────
+  // ── WEEKLY ─────────────────────────────────────────────────────────────────
   function gwk(ds){const d=new Date(ds+'T00:00:00');const diff=d.getDate()-d.getDay()+(d.getDay()===0?-6:1);const m=new Date(d);m.setDate(diff);return m.toISOString().slice(0,10);}
   function wlbl(k){const d=new Date(k+'T00:00:00');return(d.getMonth()+1)+'/'+d.getDate();}
   const wks=[];for(let i=7;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i*7);const k=gwk(d.toISOString().slice(0,10));if(!wks.includes(k))wks.push(k);}
   const wJ={},wD={},wI={},wM={},wL={},wT={},wN={},wMH={};
   wks.forEach(w=>{wJ[w]=0;wD[w]=0;wI[w]=0;wM[w]=0;wL[w]=0;wT[w]=0;wN[w]=0;wMH[w]=0;});
-  all.forEach(j=>{const w=gwk(j.date);if(wJ[w]===undefined)return;const cc=j.crew?j.crew.split(',').filter(n=>n.trim()).length:1;wJ[w]++;wD[w]+=(j.total_drive_hrs||0);wI[w]+=(j.total_install_hrs||0);wM[w]+=(j.total_meal_hrs||0);wL[w]+=(parseFloat(j.lin_ft)||0);if(j.total_hrs){wT[w]+=j.total_hrs;wN[w]++;}wMH[w]+=(j.total_hrs||0)*cc;});
+  all.forEach(j=>{const w=gwk(j.date);if(wJ[w]===undefined)return;const cc=crewSz(j);wJ[w]++;wD[w]+=(j.total_drive_hrs||0);wI[w]+=(j.total_install_hrs||0);wM[w]+=(j.total_meal_hrs||0);wL[w]+=(parseFloat(j.lin_ft)||0);if(j.total_hrs){wT[w]+=j.total_hrs;wN[w]++;}wMH[w]+=(j.total_hrs||0)*cc;});
   const wlbs=wks.map(w=>'Wk '+wlbl(w));
   const tw=gwk(new Date().toISOString().slice(0,10));
   document.getElementById('week-metrics').innerHTML=`<div class="metric blue"><div class="metric-label">Jobs this week</div><div class="metric-value">${wJ[tw]||0}</div></div><div class="metric green"><div class="metric-label">Install hrs this week</div><div class="metric-value">${(wI[tw]||0).toFixed(1)}</div></div><div class="metric"><div class="metric-label">Drive hrs this week</div><div class="metric-value">${(wD[tw]||0).toFixed(1)}</div></div><div class="metric amber"><div class="metric-label">Man-hrs this week</div><div class="metric-value">${(wMH[tw]||0).toFixed(1)}</div></div>`;
@@ -874,18 +845,18 @@ async function loadDash() {
   const cc2=['#2563eb','#15803d','#d97706','#7c3aed','#dc2626','#0891b2','#65a30d','#db2777','#ea580c','#6366f1'];
   killChart('crew');chartMap['crew']=new Chart(document.getElementById('ch-crew'),{type:'bar',data:{labels:cn,datasets:[{data:cn.map(n=>cm[n]),backgroundColor:cc2.slice(0,cn.length),borderRadius:4,label:'Jobs'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}});
 
-  // ── ISLAND ANALYSIS ───────────────────────────────────────────────────────
+  // ── ISLAND ANALYSIS ────────────────────────────────────────────────────────
   const iJ=all.filter(j=>(j.job_type==='Delivery'||j.job_type==='Grill Install')&&j.lin_ft&&j.total_install_hrs);
-  const wPg=iJ.filter(j=>j.pergola==='Yes'),nPg=iJ.filter(j=>j.pergola!=='Yes');
+  const wPg=iJ.filter(j=>j.pergola==='Yes'&&j.job_type==='Delivery'),nPg=iJ.filter(j=>!(j.pergola==='Yes'&&j.job_type==='Delivery'));
   const aIA=iJ.length?iJ.reduce((s,j)=>s+j.total_install_hrs,0)/iJ.length:0;
   const aIP=wPg.length?wPg.reduce((s,j)=>s+j.total_install_hrs,0)/wPg.length:0;
   const aIN=nPg.length?nPg.reduce((s,j)=>s+j.total_install_hrs,0)/nPg.length:0;
-  document.getElementById('island-metrics').innerHTML=`<div class="metric"><div class="metric-label">Island jobs</div><div class="metric-value">${iJ.length}</div></div><div class="metric green"><div class="metric-label">Avg install hrs (all)</div><div class="metric-value">${aIA.toFixed(1)}</div></div><div class="metric amber"><div class="metric-label">Avg install (w/ pergola)</div><div class="metric-value">${aIP.toFixed(1)}<div class="metric-sub">${wPg.length} jobs</div></div></div><div class="metric blue"><div class="metric-label">Avg install (no pergola)</div><div class="metric-value">${aIN.toFixed(1)}<div class="metric-sub">${nPg.length} jobs</div></div></div>`;
+  document.getElementById('island-metrics').innerHTML=`<div class="metric"><div class="metric-label">Island jobs tracked</div><div class="metric-value">${iJ.length}</div></div><div class="metric green"><div class="metric-label">Avg install hrs (all)</div><div class="metric-value">${aIA.toFixed(1)}</div></div><div class="metric amber"><div class="metric-label">Avg install (w/ pergola)</div><div class="metric-value">${aIP.toFixed(1)}<div class="metric-sub">${wPg.length} jobs</div></div></div><div class="metric blue"><div class="metric-label">Avg install (no pergola)</div><div class="metric-value">${aIN.toFixed(1)}<div class="metric-sub">${nPg.length} jobs</div></div></div>`;
   const rng=[{l:'0-5',mn:0,mx:5},{l:'6-10',mn:6,mx:10},{l:'11-15',mn:11,mx:15},{l:'16-20',mn:16,mx:20},{l:'21-25',mn:21,mx:25},{l:'26+',mn:26,mx:999}];
   const rc=['#bfdbfe','#93c5fd','#60a5fa','#3b82f6','#2563eb','#1d4ed8'];
   killChart('linft-range');chartMap['linft-range']=new Chart(document.getElementById('ch-linft-range'),{type:'bar',data:{labels:rng.map(r=>r.l+' ft'),datasets:[{data:rng.map(r=>{const js=iJ.filter(j=>parseFloat(j.lin_ft)>=r.mn&&parseFloat(j.lin_ft)<=r.mx);return js.length?+(js.reduce((s,j)=>s+j.total_install_hrs,0)/js.length).toFixed(2):null;}),backgroundColor:rc,borderRadius:4,label:'Avg hrs'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}});
-  killChart('pergola-compare');chartMap['pergola-compare']=new Chart(document.getElementById('ch-pergola-compare'),{type:'bar',data:{labels:['Avg install hrs','Avg drive hrs','Avg total hrs'],datasets:[{label:'With pergola',data:[wPg.length?+(wPg.reduce((s,j)=>s+(j.total_install_hrs||0),0)/wPg.length).toFixed(2):0,wPg.length?+(wPg.reduce((s,j)=>s+(j.total_drive_hrs||0),0)/wPg.length).toFixed(2):0,wPg.length?+(wPg.reduce((s,j)=>s+(j.total_hrs||0),0)/wPg.length).toFixed(2):0],backgroundColor:'#d97706',borderRadius:4},{label:'No pergola',data:[nPg.length?+(nPg.reduce((s,j)=>s+(j.total_install_hrs||0),0)/nPg.length).toFixed(2):0,nPg.length?+(nPg.reduce((s,j)=>s+(j.total_drive_hrs||0),0)/nPg.length).toFixed(2):0,nPg.length?+(nPg.reduce((s,j)=>s+(j.total_hrs||0),0)/nPg.length).toFixed(2):0],backgroundColor:'#2563eb',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:10}}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}});
-  killChart('scatter');chartMap['scatter']=new Chart(document.getElementById('ch-scatter'),{type:'scatter',data:{datasets:[{label:'With pergola',data:iJ.filter(j=>j.pergola==='Yes').map(j=>({x:+parseFloat(j.lin_ft).toFixed(1),y:+j.total_install_hrs.toFixed(2)})),backgroundColor:'rgba(217,119,6,0.7)',pointRadius:6},{label:'No pergola',data:iJ.filter(j=>j.pergola!=='Yes').map(j=>({x:+parseFloat(j.lin_ft).toFixed(1),y:+j.total_install_hrs.toFixed(2)})),backgroundColor:'rgba(37,99,235,0.7)',pointRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:10}},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.raw.x} ft → ${ctx.raw.y} hrs`}}},scales:{x:{title:{display:true,text:'Linear feet',font:{size:10}},ticks:{font:{size:10}}},y:{title:{display:true,text:'Install hrs',font:{size:10}},beginAtZero:true,ticks:{font:{size:10}}}}}});
+  killChart('pergola-compare');chartMap['pergola-compare']=new Chart(document.getElementById('ch-pergola-compare'),{type:'bar',data:{labels:['Avg install hrs','Avg drive hrs','Avg total hrs'],datasets:[{label:'With pergola',data:[wPg.length?+(wPg.reduce((s,j)=>s+(j.total_install_hrs||0),0)/wPg.length).toFixed(2):0,wPg.length?+(wPg.reduce((s,j)=>s+(j.total_drive_hrs||0),0)/wPg.length).toFixed(2):0,wPg.length?+(wPg.reduce((s,j)=>s+(j.total_hrs||0),0)/wPg.length).toFixed(2):0],backgroundColor:'#d97706',borderRadius:4},{label:'Without pergola',data:[nPg.length?+(nPg.reduce((s,j)=>s+(j.total_install_hrs||0),0)/nPg.length).toFixed(2):0,nPg.length?+(nPg.reduce((s,j)=>s+(j.total_drive_hrs||0),0)/nPg.length).toFixed(2):0,nPg.length?+(nPg.reduce((s,j)=>s+(j.total_hrs||0),0)/nPg.length).toFixed(2):0],backgroundColor:'#2563eb',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:10}}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}});
+  killChart('scatter');chartMap['scatter']=new Chart(document.getElementById('ch-scatter'),{type:'scatter',data:{datasets:[{label:'With pergola',data:iJ.filter(j=>j.pergola==='Yes'&&j.job_type==='Delivery').map(j=>({x:+parseFloat(j.lin_ft).toFixed(1),y:+j.total_install_hrs.toFixed(2)})),backgroundColor:'rgba(217,119,6,0.7)',pointRadius:6},{label:'Without pergola',data:iJ.filter(j=>!(j.pergola==='Yes'&&j.job_type==='Delivery')).map(j=>({x:+parseFloat(j.lin_ft).toFixed(1),y:+j.total_install_hrs.toFixed(2)})),backgroundColor:'rgba(37,99,235,0.7)',pointRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:10}},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.raw.x} ft → ${ctx.raw.y} hrs`}}},scales:{x:{title:{display:true,text:'Linear feet',font:{size:10}},ticks:{font:{size:10}}},y:{title:{display:true,text:'Install hrs',font:{size:10}},beginAtZero:true,ticks:{font:{size:10}}}}}});
 
   killChart('breakdown');
   chartMap['breakdown'] = new Chart(document.getElementById('ch-breakdown'),{
@@ -917,11 +888,79 @@ function showToast(msg, type='success') {
 }
 
 
+// ── HOMESHOW TIME HELPERS ─────────────────────────────────────────────────────
+const _hsMap = {
+  'hsd1':    ['f-hsd1-start','f-hsd1-end','hsd1-pill'],
+  'hssetup': ['f-hssetup-start','f-hssetup-end','hssetup-pill'],
+  'hsmb':    ['f-hsmb-start','f-hsmb-end','hsmb-pill'],
+  'hstear':  ['f-hstear-start','f-hstear-end','hstear-pill'],
+  'hsd2':    ['f-hsd2-start','f-hsd2-end','hsd2-pill'],
+};
+
+// Override calcHrs to handle homeshow keys
+const _origCalcHrs = calcHrs;
+window.calcHrs = function(section) {
+  if (_hsMap[section]) {
+    const [sid, eid, pid] = _hsMap[section];
+    const s = document.getElementById(sid);
+    const e = document.getElementById(eid);
+    const pill = document.getElementById(pid);
+    if (!s||!e||!pill||!s.value||!e.value) { if(pill){pill.textContent='— hrs';pill.className='hrs-pill';} return null; }
+    let diff = toMins(e.value) - toMins(s.value);
+    if (diff < 0) diff += 1440;
+    const h = minsToHrs(diff);
+    pill.textContent = h.toFixed(2) + ' hrs';
+    pill.className = 'hrs-pill has-val';
+    return h;
+  }
+  return _origCalcHrs(section);
+};
+
+function getHrsHS(section) {
+  if (_hsMap[section]) {
+    const [sid, eid] = _hsMap[section];
+    const s = document.getElementById(sid);
+    const e = document.getElementById(eid);
+    if (!s||!e||!s.value||!e.value) return null;
+    let diff = toMins(e.value) - toMins(s.value);
+    if (diff < 0) diff += 1440;
+    return minsToHrs(diff);
+  }
+  return getHrs(section);
+}
+
+// ── TOGGLE JOB TYPE FIELDS ────────────────────────────────────────────────────
+function toggleJobTypeFields() {
+  const v = document.getElementById('f-jobtype').value;
+  const isDelivery = v === 'Delivery';
+  const isIsland = v === 'Delivery' || v === 'Grill Install';
+  const isHomeshow = v === 'Homeshow';
+  
+  const lf = document.getElementById('linft-field');
+  const pg = document.getElementById('pergola-field');
+  const ts = document.getElementById('time-standard');
+  const th = document.getElementById('time-homeshow');
+  
+  if (lf) lf.style.display = isIsland ? '' : 'none';
+  if (pg) pg.style.display = isDelivery ? '' : 'none';
+  if (ts) ts.style.display = isHomeshow ? 'none' : '';
+  if (th) th.style.display = isHomeshow ? '' : 'none';
+}
+
+// Attach to the dropdown
+document.addEventListener('DOMContentLoaded', function() {
+  const sel = document.getElementById('f-jobtype');
+  if (sel) sel.addEventListener('change', toggleJobTypeFields);
+});
+
+// Also call on change via inline onchange (belt and suspenders)
+window.toggleIslandFields = toggleJobTypeFields;
+
+// ── MULTI-JOB STOPS ──────────────────────────────────────────────────────────
 let stopCount = 1;
 
 function stopHTML(n) {
-  return `
-  <div class="job-stop" id="stop-${n}" style="margin-top:1.25rem;border-top:2px dashed #e2e8f0;padding-top:1.25rem">
+  return `<div class="job-stop" id="stop-${n}" style="margin-top:1.25rem;border-top:2px dashed #e2e8f0;padding-top:1.25rem">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;padding:8px 12px;background:#eff6ff;border-radius:8px;border-left:3px solid #2563eb">
       <span style="font-size:0.8rem;font-weight:600;color:#2563eb">Job #${n}</span>
       <button onclick="removeStop(${n})" style="background:none;border:none;cursor:pointer;color:#94a3b8;font-size:0.8rem">✕ Remove</button>
@@ -947,7 +986,6 @@ function stopHTML(n) {
         <select id="f-pergola-${n}"><option value="No">No</option><option value="Yes">Yes</option></select>
       </div>
     </div>
-
     <div class="section-banner banner-install" style="margin-top:1rem">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
       Install — morning
@@ -956,7 +994,6 @@ function stopHTML(n) {
       <div class="field third"><label>Start</label><input type="time" id="f-i1start-${n}" oninput="calcStopHrs('i1','${n}')"></div>
       <div class="field third"><label>End</label><div class="time-row"><input type="time" id="f-i1end-${n}" oninput="calcStopHrs('i1','${n}')"><span class="hrs-pill" id="i1pill-${n}">— hrs</span></div></div>
     </div>
-
     <div class="section-banner banner-meal" style="margin-top:0.5rem">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
       Meal break
@@ -965,7 +1002,6 @@ function stopHTML(n) {
       <div class="field third"><label>Start</label><input type="time" id="f-mbstart-${n}" oninput="calcStopHrs('mb','${n}')"></div>
       <div class="field third"><label>End</label><div class="time-row"><input type="time" id="f-mbend-${n}" oninput="calcStopHrs('mb','${n}')"><span class="hrs-pill" id="mbpill-${n}">— hrs</span></div></div>
     </div>
-
     <div class="section-banner banner-install2" style="margin-top:0.5rem">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
       Install — afternoon
@@ -974,7 +1010,6 @@ function stopHTML(n) {
       <div class="field third"><label>Start</label><input type="time" id="f-i2start-${n}" oninput="calcStopHrs('i2','${n}')"></div>
       <div class="field third"><label>End</label><div class="time-row"><input type="time" id="f-i2end-${n}" oninput="calcStopHrs('i2','${n}')"><span class="hrs-pill" id="i2pill-${n}">— hrs</span></div></div>
     </div>
-
     <div class="section-banner banner-drive2" style="margin-top:0.5rem">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
       Drive back to shop
@@ -983,7 +1018,6 @@ function stopHTML(n) {
       <div class="field third"><label>Depart job site</label><input type="time" id="f-d2start-${n}" oninput="calcStopHrs('d2','${n}')"></div>
       <div class="field third"><label>Arrive shop</label><div class="time-row"><input type="time" id="f-d2end-${n}" oninput="calcStopHrs('d2','${n}')"><span class="hrs-pill" id="d2pill-${n}">— hrs</span></div></div>
     </div>
-
     <div class="form-grid" style="margin-top:0.5rem">
       <div class="field full"><label>Notes</label><input type="text" id="f-notes-${n}" placeholder="Any additional notes..."></div>
     </div>
@@ -992,8 +1026,7 @@ function stopHTML(n) {
 
 function addJobStop() {
   stopCount++;
-  const container = document.getElementById('job-stops');
-  container.insertAdjacentHTML('beforeend', stopHTML(stopCount));
+  document.getElementById('job-stops').insertAdjacentHTML('beforeend', stopHTML(stopCount));
 }
 
 function removeStop(n) {
@@ -1005,43 +1038,29 @@ function calcStopHrs(key, n) {
   const s = document.getElementById('f-' + key + 'start-' + n);
   const e = document.getElementById('f-' + key + 'end-' + n);
   const pill = document.getElementById(key + 'pill-' + n);
-  if (!s || !e || !pill) return null;
-  if (!s.value || !e.value) { pill.textContent = '— hrs'; pill.className = 'hrs-pill'; return null; }
-  let sm = parseInt(s.value.split(':')[0])*60 + parseInt(s.value.split(':')[1]);
-  let em = parseInt(e.value.split(':')[0])*60 + parseInt(e.value.split(':')[1]);
-  let diff = em - sm; if (diff < 0) diff += 1440;
-  const h = parseFloat((diff/60).toFixed(2));
-  pill.textContent = h.toFixed(2) + ' hrs'; pill.className = 'hrs-pill has-val';
-  return h;
+  if (!s||!e||!pill||!s.value||!e.value) { if(pill){pill.textContent='— hrs';pill.className='hrs-pill';} return null; }
+  let diff = toMins(e.value) - toMins(s.value); if (diff<0) diff+=1440;
+  const h = minsToHrs(diff);
+  pill.textContent = h.toFixed(2)+' hrs'; pill.className='hrs-pill has-val'; return h;
 }
 
 function getStopHrs(key, n) {
   const s = document.getElementById('f-' + key + 'start-' + n);
   const e = document.getElementById('f-' + key + 'end-' + n);
-  if (!s || !e || !s.value || !e.value) return null;
-  let sm = parseInt(s.value.split(':')[0])*60 + parseInt(s.value.split(':')[1]);
-  let em = parseInt(e.value.split(':')[0])*60 + parseInt(e.value.split(':')[1]);
-  let diff = em - sm; if (diff < 0) diff += 1440;
-  return parseFloat((diff/60).toFixed(2));
+  if (!s||!e||!s.value||!e.value) return null;
+  let diff = toMins(e.value) - toMins(s.value); if(diff<0) diff+=1440;
+  return minsToHrs(diff);
 }
 
 function toggleIslandFieldsN(n) {
-  const v = document.getElementById('f-jobtype-' + n) ? document.getElementById('f-jobtype-' + n).value : '';
-  const showLinFt = v === 'Delivery' || v === 'Grill Install';
-  const showPergola = v === 'Delivery';
-  const lf = document.getElementById('linft-field-' + n);
-  const pg = document.getElementById('pergola-field-' + n);
-  if (lf) lf.style.display = showLinFt ? '' : 'none';
-  if (pg) pg.style.display = showPergola ? '' : 'none';
-  // homeshow time sections for additional stops
-  const stdN = document.getElementById('time-standard-' + n);
-  const hsN = document.getElementById('time-homeshow-' + n);
-  if (stdN) stdN.style.display = v === 'Homeshow' ? 'none' : '';
-  if (hsN) hsN.style.display = v === 'Homeshow' ? '' : 'none';
+  const v = (document.getElementById('f-jobtype-'+n)||{}).value||'';
+  const lf = document.getElementById('linft-field-'+n);
+  const pg = document.getElementById('pergola-field-'+n);
+  if (lf) lf.style.display = (v==='Delivery'||v==='Grill Install') ? '' : 'none';
+  if (pg) pg.style.display = v==='Delivery' ? '' : 'none';
 }
 
 init();
 </script>
-<!-- Run in Supabase SQL: ALTER TABLE jobs ADD COLUMN IF NOT EXISTS so_number text; -->
 </body>
 </html>
