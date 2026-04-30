@@ -165,6 +165,12 @@
   #time-standard.hidden { display: none; }
   #time-homeshow.visible { display: block; }
 
+
+  .crew-cb-item { display:inline-flex; align-items:center; gap:6px; background:var(--gray-100); border:1px solid var(--gray-200); border-radius:20px; padding:4px 12px; cursor:pointer; font-size:0.85rem; color:var(--gray-700); user-select:none; transition:all 0.15s; }
+  .crew-cb-item:hover { border-color:var(--blue); background:var(--blue-light); }
+  .crew-cb-item.selected { background:var(--blue-light); border-color:var(--blue); color:var(--blue); font-weight:600; }
+  .crew-cb-item input[type=checkbox] { accent-color:var(--blue); width:14px; height:14px; }
+
 </style>
 </head>
 <body>
@@ -217,8 +223,11 @@
         </div>
         <div class="field full">
           <label>Crew assigned</label>
-          <input type="text" id="f-crew" list="crew-dl" placeholder="Pick from list or type freely — e.g. Sergio, Carlos">
-          <datalist id="crew-dl"></datalist>
+          <div id="crew-checkbox-list" style="display:flex;flex-wrap:wrap;gap:8px;padding:10px;border:1px solid var(--gray-300);border-radius:var(--radius);background:white;min-height:42px">
+            <span style="color:var(--gray-400);font-size:0.875rem;align-self:center" id="crew-placeholder">Loading crew roster...</span>
+          </div>
+          <input type="hidden" id="f-crew">
+          <input type="hidden" id="f-crew-count">
         </div>
         <div class="field third">
           <label>Customer name</label>
@@ -460,7 +469,11 @@
         </div>
         <div class="field full">
           <label>Crew assigned</label>
-          <input type="text" id="hs-crew" list="crew-dl" placeholder="Pick from list or type freely — e.g. Sergio, Carlos">
+          <div id="hs-crew-checkbox-list" style="display:flex;flex-wrap:wrap;gap:8px;padding:10px;border:1px solid var(--gray-300);border-radius:var(--radius);background:white;min-height:42px">
+            <span style="color:var(--gray-400);font-size:0.875rem;align-self:center" id="hs-crew-placeholder">Loading crew roster...</span>
+          </div>
+          <input type="hidden" id="hs-crew">
+          <input type="hidden" id="hs-crew-count">
         </div>
         <div class="field full">
           <label>Notes</label>
@@ -671,7 +684,7 @@ async function saveJob() {
     total_drive_hrs: driveHrs||null, total_install_hrs: installHrs||null,
     total_meal_hrs: mealHrs||null, total_hrs: (driveHrs+installHrs+mealHrs)||null,
     notes: document.getElementById('f-notes').value.trim()||null,
-    crew_count: document.getElementById('f-crew').value.trim() ? document.getElementById('f-crew').value.trim().split(',').filter(n=>n.trim()).length : 1,
+    crew_count: parseInt(document.getElementById('f-crew-count').value)||1,
   }];
 
   // Additional stops
@@ -699,7 +712,7 @@ async function saveJob() {
         total_drive_hrs:nd2||null,total_install_hrs:(ni1||0)+(ni2||0)||null,
         total_meal_hrs:nmb||null,total_hrs:((nd2||0)+(ni1||0)+(ni2||0)+(nmb||0))||null,
         notes:(document.getElementById('f-notes-'+n)||{}).value||null,
-        crew_count: document.getElementById('f-crew').value.trim() ? document.getElementById('f-crew').value.trim().split(',').filter(n=>n.trim()).length : 1,
+        crew_count: parseInt(document.getElementById('f-crew-count').value)||1,
       });
     }
     n++;
@@ -709,7 +722,8 @@ async function saveJob() {
   if(error){showToast('Error: '+error.message,'error');return;}
   showToast(jobs.length+' job'+(jobs.length>1?'s':'')+' saved!','success');
 
-  ['f-customer','f-so','f-address','f-notes','f-linft'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['f-customer','f-so','f-address','f-notes','f-linft'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';}); 
+  resetCrewCheckboxes('crew-checkbox-list','f-crew','f-crew-count');
   ['f-d1-start','f-d1-end','f-i1-start','f-i1-end','f-mb-start','f-mb-end','f-i2-start','f-i2-end','f-d2-start','f-d2-end',
    'f-hsd1-start','f-hsd1-end','f-hssetup-start','f-hssetup-end','f-hsmb-start','f-hsmb-end','f-hstear-start','f-hstear-end','f-hsd2-start','f-hsd2-end'
   ].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
@@ -801,10 +815,58 @@ async function saveCrew() {
   await refreshCrewDl();
   showToast('Roster saved!', 'success');
 }
-async function refreshCrewDl(data=null) {
-  if (!sbClient && !data) return;
-  if (!data) { const r = await sbClient.from('crew').select('name').order('sort_order'); data = r.data||[]; }
-  document.getElementById('crew-dl').innerHTML = data.map(m=>`<option value="${m.name}">`).join('');
+async function refreshCrewDl(crew) {
+  let names = [];
+  if (crew !== undefined) {
+    names = (crew||[]).map(m => m.name||m);
+  } else if (sbClient) {
+    const {data} = await sbClient.from('crew').select('name').order('sort_order');
+    names = (data||[]).map(m => m.name||m);
+  }
+  window._crewRoster = names;
+  renderCrewCheckboxes('crew-checkbox-list', 'crew-placeholder', 'f-crew', 'f-crew-count', names);
+  renderCrewCheckboxes('hs-crew-checkbox-list', 'hs-crew-placeholder', 'hs-crew', 'hs-crew-count', names);
+}
+
+function renderCrewCheckboxes(listId, placeholderId, hiddenId, countId, names) {
+  const list = document.getElementById(listId);
+  if (!list) return;
+  const ph = document.getElementById(placeholderId);
+  if (!names || !names.length) {
+    if (ph) { ph.style.display=''; ph.textContent='No crew added yet — go to Crew tab.'; }
+    return;
+  }
+  if (ph) ph.style.display = 'none';
+  list.innerHTML = names.map(name => `
+    <label class="crew-cb-item" onclick="toggleCrewCB(this,'${listId}','${hiddenId}','${countId}')">
+      <input type="checkbox" value="${name}" style="pointer-events:none"> ${name}
+    </label>`).join('');
+}
+
+function toggleCrewCB(label, listId, hiddenId, countId) {
+  label.classList.toggle('selected');
+  const cb = label.querySelector('input[type=checkbox]');
+  if (cb) cb.checked = !cb.checked;
+  updateCrewHidden(listId, hiddenId, countId);
+}
+
+function updateCrewHidden(listId, hiddenId, countId) {
+  const list = document.getElementById(listId);
+  if (!list) return;
+  const selected = [...list.querySelectorAll('input[type=checkbox]:checked')].map(cb => cb.value);
+  const h = document.getElementById(hiddenId); if(h) h.value = selected.join(', ');
+  const c = document.getElementById(countId); if(c) c.value = selected.length;
+}
+
+function resetCrewCheckboxes(listId, hiddenId, countId) {
+  const list = document.getElementById(listId);
+  if (!list) return;
+  list.querySelectorAll('.crew-cb-item').forEach(l => {
+    l.classList.remove('selected');
+    const cb = l.querySelector('input'); if(cb) cb.checked = false;
+  });
+  const h = document.getElementById(hiddenId); if(h) h.value='';
+  const c = document.getElementById(countId); if(c) c.value='';
 }
 
 // ── DASHBOARD ────────────────────────────────────────────────────────────────
@@ -1196,7 +1258,7 @@ async function saveHomeshow() {
     total_drive_hrs:driveHrs||null,total_install_hrs:installHrs||null,
     total_meal_hrs:mealHrs||null,total_hrs:(driveHrs+installHrs+mealHrs)||null,
     notes:document.getElementById('hs-notes').value.trim()||null,
-    crew_count: document.getElementById('hs-crew').value.trim() ? document.getElementById('hs-crew').value.trim().split(',').filter(n=>n.trim()).length : 1,
+    crew_count: parseInt(document.getElementById('hs-crew-count').value)||1,
   };
   const{error}=await sbClient.from('jobs').insert([job]);
   if(error){showToast('Error: '+error.message,'error');return;}
@@ -1208,6 +1270,7 @@ async function saveHomeshow() {
   });
   document.getElementById('hs-total-preview').textContent='';
   document.getElementById('hs-date').value=new Date().toISOString().slice(0,10);
+  resetCrewCheckboxes('hs-crew-checkbox-list','hs-crew','hs-crew-count');
   loadHSHistory();
 }
 
