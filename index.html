@@ -550,6 +550,11 @@ let sbClient = null;
 let chartMap = {};
 
 // ── INIT ─────────────────────────────────────────────────────────────────────
+// ── GLOBAL HELPERS ───────────────────────────────────────────────────────────
+function crewSz(j) {
+  return j.crew_count || (j.crew ? j.crew.split(',').filter(n=>n.trim()).length : 1);
+}
+
 async function loadSupabase() {
   return new Promise((resolve) => {
     if (window.supabase && window.supabase.createClient) { resolve(); return; }
