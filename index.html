@@ -869,30 +869,61 @@ async function loadDash() {
   });
 
 
-  // ── CREW SIZE ─────────────────────────────────────────────────────────────
-  function crewSz(j){return j.crew_count || (j.crew?j.crew.split(',').filter(n=>n.trim()).length:1);}
-  const totalManHrs=all.reduce((s,j)=>s+(j.total_hrs||0)*crewSz(j),0);
-  const totalCrewSlots=all.reduce((s,j)=>s+crewSz(j),0);
-  const avgMH=totalCrewSlots?totalManHrs/totalCrewSlots:0;
-  const avgIMH=totalCrewSlots?all.reduce((s,j)=>s+(j.total_install_hrs||0)*crewSz(j),0)/totalCrewSlots:0;
-  const avgDMH=totalCrewSlots?all.reduce((s,j)=>s+(j.total_drive_hrs||0)*crewSz(j),0)/totalCrewSlots:0;
-  const pergCount=all.filter(j=>j.pergola==='Yes'&&j.job_type==='Delivery').length;
-  document.getElementById('dash-metrics').innerHTML=`
-    <div class="metric blue"><div class="metric-label">Total jobs</div><div class="metric-value">${total}</div><div class="metric-sub">${totalCrewSlots} crew assignments</div></div>
-    <div class="metric"><div class="metric-label">Avg man-hrs / crew member</div><div class="metric-value">${avgMH.toFixed(1)}</div></div>
-    <div class="metric green"><div class="metric-label">Avg install man-hrs</div><div class="metric-value">${avgIMH.toFixed(1)}</div><div class="metric-sub">Drive: ${avgDMH.toFixed(1)} man-hrs</div></div>
-    <div class="metric amber"><div class="metric-label">Total lin. ft</div><div class="metric-value">${totalLinFt.toFixed(0)}</div><div class="metric-sub">${pergCount} delivery jobs w/ pergola</div></div>`;
+  // ── CREW SIZE & MAN-HOUR METRICS ─────────────────────────────────────────────
+  function crewSz(j){ return j.crew_count || (j.crew ? j.crew.split(',').filter(n=>n.trim()).length : 1); }
+
+  const totalManHrs = all.reduce((s,j) => s + (j.total_hrs||0) * crewSz(j), 0);
+  const totalDriveManHrs = all.reduce((s,j) => s + (j.total_drive_hrs||0) * crewSz(j), 0);
+  const totalInstallManHrs = all.reduce((s,j) => s + (j.total_install_hrs||0) * crewSz(j), 0);
+  const totalMealManHrs = all.reduce((s,j) => s + (j.total_meal_hrs||0) * crewSz(j), 0);
+  const totalCrewSlots = all.reduce((s,j) => s + crewSz(j), 0);
+  const avgManHrsPerSlot = totalCrewSlots ? totalManHrs / totalCrewSlots : 0;
+  const avgInstManHrs = totalCrewSlots ? totalInstallManHrs / totalCrewSlots : 0;
+  const avgDriveManHrs = totalCrewSlots ? totalDriveManHrs / totalCrewSlots : 0;
+  const avgMealManHrs = totalCrewSlots ? totalMealManHrs / totalCrewSlots : 0;
+  const pergCount = all.filter(j => j.pergola==='Yes' && j.job_type==='Delivery').length;
+
+  document.getElementById('dash-metrics').innerHTML = `
+    <div class="metric blue">
+      <div class="metric-label">Total jobs</div>
+      <div class="metric-value">${total}</div>
+      <div class="metric-sub">${totalCrewSlots} total crew assignments</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Total man-hours</div>
+      <div class="metric-value">${totalManHrs.toFixed(1)}</div>
+      <div class="metric-sub">Avg ${avgManHrsPerSlot.toFixed(1)} hrs per crew member</div>
+    </div>
+    <div class="metric green">
+      <div class="metric-label">Total install man-hrs</div>
+      <div class="metric-value">${totalInstallManHrs.toFixed(1)}</div>
+      <div class="metric-sub">Avg ${avgInstManHrs.toFixed(1)} per crew member</div>
+    </div>
+    <div class="metric amber">
+      <div class="metric-label">Total drive man-hrs</div>
+      <div class="metric-value">${totalDriveManHrs.toFixed(1)}</div>
+      <div class="metric-sub">Avg ${avgDriveManHrs.toFixed(1)} per crew member</div>
+    </div>
+    <div class="metric" style="background:var(--navy);color:white">
+      <div class="metric-label" style="color:#94a3b8">Total lin. ft delivered</div>
+      <div class="metric-value" style="color:white">${totalLinFt.toFixed(0)}</div>
+      <div class="metric-sub" style="color:#94a3b8">${pergCount} delivery jobs w/ pergola</div>
+    </div>`;
 
   // ── WEEKLY ─────────────────────────────────────────────────────────────────
   function gwk(ds){const d=new Date(ds+'T00:00:00');const diff=d.getDate()-d.getDay()+(d.getDay()===0?-6:1);const m=new Date(d);m.setDate(diff);return m.toISOString().slice(0,10);}
   function wlbl(k){const d=new Date(k+'T00:00:00');return(d.getMonth()+1)+'/'+d.getDate();}
   const wks=[];for(let i=7;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i*7);const k=gwk(d.toISOString().slice(0,10));if(!wks.includes(k))wks.push(k);}
-  const wJ={},wD={},wI={},wM={},wL={},wT={},wN={},wMH={};
-  wks.forEach(w=>{wJ[w]=0;wD[w]=0;wI[w]=0;wM[w]=0;wL[w]=0;wT[w]=0;wN[w]=0;wMH[w]=0;});
-  all.forEach(j=>{const w=gwk(j.date);if(wJ[w]===undefined)return;const cc=crewSz(j);wJ[w]++;wD[w]+=(j.total_drive_hrs||0);wI[w]+=(j.total_install_hrs||0);wM[w]+=(j.total_meal_hrs||0);wL[w]+=(parseFloat(j.lin_ft)||0);if(j.total_hrs){wT[w]+=j.total_hrs;wN[w]++;}wMH[w]+=(j.total_hrs||0)*cc;});
+  const wJ={},wD={},wI={},wM={},wL={},wT={},wN={},wMH={},wDMH={},wIMH={},wCS={};
+  wks.forEach(w=>{wJ[w]=0;wD[w]=0;wI[w]=0;wM[w]=0;wL[w]=0;wT[w]=0;wN[w]=0;wMH[w]=0;wDMH[w]=0;wIMH[w]=0;wCS[w]=0;});
+  all.forEach(j=>{const w=gwk(j.date);if(wJ[w]===undefined)return;const cc=crewSz(j);wJ[w]++;wD[w]+=(j.total_drive_hrs||0);wI[w]+=(j.total_install_hrs||0);wM[w]+=(j.total_meal_hrs||0);wL[w]+=(parseFloat(j.lin_ft)||0);if(j.total_hrs){wT[w]+=j.total_hrs;wN[w]++;}wMH[w]+=(j.total_hrs||0)*cc;wDMH[w]+=(j.total_drive_hrs||0)*cc;wIMH[w]+=(j.total_install_hrs||0)*cc;wCS[w]+=cc;});
   const wlbs=wks.map(w=>'Wk '+wlbl(w));
   const tw=gwk(new Date().toISOString().slice(0,10));
-  document.getElementById('week-metrics').innerHTML=`<div class="metric blue"><div class="metric-label">Jobs this week</div><div class="metric-value">${wJ[tw]||0}</div></div><div class="metric green"><div class="metric-label">Install hrs this week</div><div class="metric-value">${(wI[tw]||0).toFixed(1)}</div></div><div class="metric"><div class="metric-label">Drive hrs this week</div><div class="metric-value">${(wD[tw]||0).toFixed(1)}</div></div><div class="metric amber"><div class="metric-label">Man-hrs this week</div><div class="metric-value">${(wMH[tw]||0).toFixed(1)}</div></div>`;
+  document.getElementById('week-metrics').innerHTML=`
+    <div class="metric blue"><div class="metric-label">Jobs this week</div><div class="metric-value">${wJ[tw]||0}</div></div>
+    <div class="metric green"><div class="metric-label">Install man-hrs this week</div><div class="metric-value">${(wIMH[tw]||0).toFixed(1)}</div><div class="metric-sub">Avg per crew: ${wCS[tw]?(wIMH[tw]/wCS[tw]).toFixed(1):0} hrs</div></div>
+    <div class="metric"><div class="metric-label">Drive man-hrs this week</div><div class="metric-value">${(wDMH[tw]||0).toFixed(1)}</div><div class="metric-sub">Avg per crew: ${wCS[tw]?(wDMH[tw]/wCS[tw]).toFixed(1):0} hrs</div></div>
+    <div class="metric amber"><div class="metric-label">Total man-hrs this week</div><div class="metric-value">${(wMH[tw]||0).toFixed(1)}</div><div class="metric-sub">Avg per crew: ${wCS[tw]?(wMH[tw]/wCS[tw]).toFixed(1):0} hrs</div></div>`;
   killChart('wjobs');chartMap['wjobs']=new Chart(document.getElementById('ch-wjobs'),{type:'bar',data:{labels:wlbs,datasets:[{data:wks.map(w=>wJ[w]),backgroundColor:'#2563eb',borderRadius:4,label:'Jobs'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}});
   killChart('whrs');chartMap['whrs']=new Chart(document.getElementById('ch-whrs'),{type:'bar',data:{labels:wlbs,datasets:[{data:wks.map(w=>+wD[w].toFixed(2)),label:'Drive',backgroundColor:'#2563eb',borderRadius:2},{data:wks.map(w=>+wI[w].toFixed(2)),label:'Install',backgroundColor:'#15803d',borderRadius:2},{data:wks.map(w=>+wM[w].toFixed(2)),label:'Meal',backgroundColor:'#d97706',borderRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:10}}},scales:{x:{stacked:true,ticks:{font:{size:10}},grid:{display:false}},y:{stacked:true,beginAtZero:true,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}}}}});
   killChart('wmanhrs');chartMap['wmanhrs']=new Chart(document.getElementById('ch-wmanhrs'),{type:'bar',data:{labels:wlbs,datasets:[{data:wks.map(w=>+wMH[w].toFixed(1)),backgroundColor:'#7c3aed',borderRadius:4,label:'Man-hrs'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}});
