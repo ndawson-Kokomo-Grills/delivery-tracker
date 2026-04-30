@@ -893,6 +893,11 @@ async function loadDash() {
     `<div class="leg-item"><span class="leg-sq" style="background:${typeColors[i]}"></span>${t} (${typeCounts[i]})</div>`).join('');
 
   killChart('type');
+  // Job type counts (not crew weighted - just job counts)
+  const typeManHrs = types.map(t => {
+    const jobs = all.filter(j => j.job_type===t);
+    return parseFloat(jobs.reduce((s,j)=>s+(j.total_install_hrs||0)*crewSz(j),0).toFixed(2));
+  });
   chartMap['type'] = new Chart(document.getElementById('ch-type'),{
     type:'doughnut',
     data:{labels:types,datasets:[{data:typeCounts,backgroundColor:typeColors,borderWidth:2,borderColor:'#fff'}]},
@@ -900,16 +905,44 @@ async function loadDash() {
   });
 
   killChart('avg');
+  // Avg install MAN-hours by job type (install hrs × crew size / job count)
+  const typeAvgManHrs = types.map(t => {
+    const jobs = all.filter(j => j.job_type===t);
+    if (!jobs.length) return 0;
+    const totalMH = jobs.reduce((s,j)=>s+(j.total_install_hrs||0)*crewSz(j),0);
+    return parseFloat((totalMH/jobs.length).toFixed(2));
+  });
   chartMap['avg'] = new Chart(document.getElementById('ch-avg'),{
     type:'bar',
-    data:{labels:types,datasets:[{data:typeInstHrs.map(v=>parseFloat(v.toFixed(2))),backgroundColor:typeColors,borderRadius:4,label:'Avg install hrs'}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11}}},x:{grid:{display:false},ticks:{font:{size:11}}}}}
+    data:{labels:types,datasets:[{data:typeAvgManHrs,backgroundColor:typeColors,borderRadius:4,label:'Avg install man-hrs'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.raw} man-hrs`}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11}}},x:{grid:{display:false},ticks:{font:{size:11}}}}}
   });
 
-  const today = new Date();
+  killChart('breakdown');
+  chartMap['breakdown']=new Chart(document.getElementById('ch-breakdown'),{
+    type:'bar',
+    data:{
+      labels:['Drive there','Install AM','Meal break','Install PM','Drive back'],
+      datasets:[{
+        data:[
+          +(all.reduce((s,j)=>s+(j.drive1_hrs||0)*crewSz(j),0)/(total||1)).toFixed(2),
+          +(all.reduce((s,j)=>s+(j.install1_hrs||0)*crewSz(j),0)/(total||1)).toFixed(2),
+          +(all.reduce((s,j)=>s+(j.meal_hrs||0)*crewSz(j),0)/(total||1)).toFixed(2),
+          +(all.reduce((s,j)=>s+(j.install2_hrs||0)*crewSz(j),0)/(total||1)).toFixed(2),
+          +(all.reduce((s,j)=>s+(j.drive2_hrs||0)*crewSz(j),0)/(total||1)).toFixed(2),
+        ],
+        backgroundColor:['#2563eb','#15803d','#d97706','#166534','#4338ca'],
+        borderRadius:4,label:'Avg man-hrs'
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.raw} man-hrs`}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:10}}}}}
+  });
+
+  // ── DAILY CHARTS ──────────────────────────────────────────────────────────
+  const today=new Date();
   const days=[],dayCounts=[],dayLinFt=[];
   for(let i=29;i>=0;i--){
-    const d=new Date(today); d.setDate(d.getDate()-i);
+    const d=new Date(today);d.setDate(d.getDate()-i);
     const ds=d.toISOString().slice(0,10);
     days.push(ds.slice(5));
     dayCounts.push(all.filter(j=>j.date===ds).length);
@@ -917,117 +950,140 @@ async function loadDash() {
   }
 
   killChart('daily');
-  chartMap['daily'] = new Chart(document.getElementById('ch-daily'),{
+  chartMap['daily']=new Chart(document.getElementById('ch-daily'),{
     type:'line',
-    data:{labels:days,datasets:[{data:dayCounts,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,0.06)',tension:0.4,fill:true,pointRadius:2,pointBackgroundColor:'#2563eb',label:'Jobs'}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:9},autoSkip:true,maxTicksLimit:15,maxRotation:45},grid:{display:false}}}}
+    data:{labels:days,datasets:[{label:'Jobs',data:dayCounts,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,0.08)',pointBackgroundColor:'#2563eb',tension:0.3,fill:true,pointRadius:3}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{size:10}},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:9},autoSkip:true,maxTicksLimit:15,maxRotation:45},grid:{display:false}}}}
   });
 
   killChart('linft');
-  chartMap['linft'] = new Chart(document.getElementById('ch-linft'),{
+  chartMap['linft']=new Chart(document.getElementById('ch-linft'),{
     type:'bar',
-    data:{labels:days,datasets:[{data:dayLinFt.map(v=>parseFloat(v.toFixed(1))),backgroundColor:'rgba(37,99,235,0.45)',borderColor:'#2563eb',borderWidth:1,borderRadius:3,label:'Lin ft'}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10}}},x:{ticks:{font:{size:9},autoSkip:true,maxTicksLimit:15,maxRotation:45},grid:{display:false}}}}
+    data:{labels:days,datasets:[{label:'Lin ft',data:dayLinFt.map(v=>parseFloat(v.toFixed(1))),backgroundColor:'rgba(55,138,221,0.5)',borderColor:'#378ADD',borderWidth:1,borderRadius:3}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:10}}},x:{ticks:{font:{size:9},autoSkip:true,maxTicksLimit:15,maxRotation:45},grid:{display:false}}}}
   });
 
-
-  // ── CREW SIZE & MAN-HOUR METRICS ─────────────────────────────────────────────
-  function crewSz(j){ return j.crew_count || (j.crew ? j.crew.split(',').filter(n=>n.trim()).length : 1); }
-
-  const totalManHrs = all.reduce((s,j) => s + (j.total_hrs||0) * crewSz(j), 0);
-  const totalDriveManHrs = all.reduce((s,j) => s + (j.total_drive_hrs||0) * crewSz(j), 0);
-  const totalInstallManHrs = all.reduce((s,j) => s + (j.total_install_hrs||0) * crewSz(j), 0);
-  const totalMealManHrs = all.reduce((s,j) => s + (j.total_meal_hrs||0) * crewSz(j), 0);
-  const totalCrewSlots = all.reduce((s,j) => s + crewSz(j), 0);
-  const avgManHrsPerSlot = totalCrewSlots ? totalManHrs / totalCrewSlots : 0;
-  const avgInstManHrs = totalCrewSlots ? totalInstallManHrs / totalCrewSlots : 0;
-  const avgDriveManHrs = totalCrewSlots ? totalDriveManHrs / totalCrewSlots : 0;
-  const avgMealManHrs = totalCrewSlots ? totalMealManHrs / totalCrewSlots : 0;
-  const pergCount = all.filter(j => j.pergola==='Yes' && j.job_type==='Delivery').length;
-
-  document.getElementById('dash-metrics').innerHTML = `
-    <div class="metric blue">
-      <div class="metric-label">Total jobs</div>
-      <div class="metric-value">${total}</div>
-      <div class="metric-sub">${totalCrewSlots} total crew assignments</div>
-    </div>
-    <div class="metric">
-      <div class="metric-label">Total man-hours</div>
-      <div class="metric-value">${totalManHrs.toFixed(1)}</div>
-      <div class="metric-sub">Avg ${avgManHrsPerSlot.toFixed(1)} hrs per crew member</div>
-    </div>
-    <div class="metric green">
-      <div class="metric-label">Total install man-hrs</div>
-      <div class="metric-value">${totalInstallManHrs.toFixed(1)}</div>
-      <div class="metric-sub">Avg ${avgInstManHrs.toFixed(1)} per crew member</div>
-    </div>
-    <div class="metric amber">
-      <div class="metric-label">Total drive man-hrs</div>
-      <div class="metric-value">${totalDriveManHrs.toFixed(1)}</div>
-      <div class="metric-sub">Avg ${avgDriveManHrs.toFixed(1)} per crew member</div>
-    </div>
-    <div class="metric" style="background:var(--navy);color:white">
-      <div class="metric-label" style="color:#94a3b8">Total lin. ft delivered</div>
-      <div class="metric-value" style="color:white">${totalLinFt.toFixed(0)}</div>
-      <div class="metric-sub" style="color:#94a3b8">${pergCount} delivery jobs w/ pergola</div>
-    </div>`;
-
-  // ── WEEKLY ─────────────────────────────────────────────────────────────────
+  // ── WEEKLY CHARTS ──────────────────────────────────────────────────────────
   function gwk(ds){const d=new Date(ds+'T00:00:00');const diff=d.getDate()-d.getDay()+(d.getDay()===0?-6:1);const m=new Date(d);m.setDate(diff);return m.toISOString().slice(0,10);}
   function wlbl(k){const d=new Date(k+'T00:00:00');return(d.getMonth()+1)+'/'+d.getDate();}
   const wks=[];for(let i=7;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i*7);const k=gwk(d.toISOString().slice(0,10));if(!wks.includes(k))wks.push(k);}
   const wJ={},wD={},wI={},wM={},wL={},wT={},wN={},wMH={},wDMH={},wIMH={},wCS={};
   wks.forEach(w=>{wJ[w]=0;wD[w]=0;wI[w]=0;wM[w]=0;wL[w]=0;wT[w]=0;wN[w]=0;wMH[w]=0;wDMH[w]=0;wIMH[w]=0;wCS[w]=0;});
-  all.forEach(j=>{const w=gwk(j.date);if(wJ[w]===undefined)return;const cc=crewSz(j);wJ[w]++;wD[w]+=(j.total_drive_hrs||0);wI[w]+=(j.total_install_hrs||0);wM[w]+=(j.total_meal_hrs||0);wL[w]+=(parseFloat(j.lin_ft)||0);if(j.total_hrs){wT[w]+=j.total_hrs;wN[w]++;}wMH[w]+=(j.total_hrs||0)*cc;wDMH[w]+=(j.total_drive_hrs||0)*cc;wIMH[w]+=(j.total_install_hrs||0)*cc;wCS[w]+=cc;});
+  all.forEach(j=>{
+    const w=gwk(j.date);if(wJ[w]===undefined)return;
+    const cc=crewSz(j);
+    wJ[w]++;wD[w]+=(j.total_drive_hrs||0);wI[w]+=(j.total_install_hrs||0);
+    wM[w]+=(j.total_meal_hrs||0);wL[w]+=(parseFloat(j.lin_ft)||0);
+    if(j.total_hrs){wT[w]+=j.total_hrs;wN[w]++;}
+    wMH[w]+=(j.total_hrs||0)*cc;
+    wDMH[w]+=(j.total_drive_hrs||0)*cc;
+    wIMH[w]+=(j.total_install_hrs||0)*cc;
+    wCS[w]+=cc;
+  });
   const wlbs=wks.map(w=>'Wk '+wlbl(w));
   const tw=gwk(new Date().toISOString().slice(0,10));
+
   document.getElementById('week-metrics').innerHTML=`
     <div class="metric blue"><div class="metric-label">Jobs this week</div><div class="metric-value">${wJ[tw]||0}</div></div>
     <div class="metric green"><div class="metric-label">Install man-hrs this week</div><div class="metric-value">${(wIMH[tw]||0).toFixed(1)}</div><div class="metric-sub">Avg per crew: ${wCS[tw]?(wIMH[tw]/wCS[tw]).toFixed(1):0} hrs</div></div>
     <div class="metric"><div class="metric-label">Drive man-hrs this week</div><div class="metric-value">${(wDMH[tw]||0).toFixed(1)}</div><div class="metric-sub">Avg per crew: ${wCS[tw]?(wDMH[tw]/wCS[tw]).toFixed(1):0} hrs</div></div>
     <div class="metric amber"><div class="metric-label">Total man-hrs this week</div><div class="metric-value">${(wMH[tw]||0).toFixed(1)}</div><div class="metric-sub">Avg per crew: ${wCS[tw]?(wMH[tw]/wCS[tw]).toFixed(1):0} hrs</div></div>`;
-  killChart('wjobs');chartMap['wjobs']=new Chart(document.getElementById('ch-wjobs'),{type:'bar',data:{labels:wlbs,datasets:[{data:wks.map(w=>wJ[w]),backgroundColor:'#2563eb',borderRadius:4,label:'Jobs'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}});
-  killChart('whrs');chartMap['whrs']=new Chart(document.getElementById('ch-whrs'),{type:'bar',data:{labels:wlbs,datasets:[{data:wks.map(w=>+wD[w].toFixed(2)),label:'Drive',backgroundColor:'#2563eb',borderRadius:2},{data:wks.map(w=>+wI[w].toFixed(2)),label:'Install',backgroundColor:'#15803d',borderRadius:2},{data:wks.map(w=>+wM[w].toFixed(2)),label:'Meal',backgroundColor:'#d97706',borderRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:10}}},scales:{x:{stacked:true,ticks:{font:{size:10}},grid:{display:false}},y:{stacked:true,beginAtZero:true,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}}}}});
-  killChart('wmanhrs');chartMap['wmanhrs']=new Chart(document.getElementById('ch-wmanhrs'),{type:'bar',data:{labels:wlbs,datasets:[{data:wks.map(w=>+wMH[w].toFixed(1)),backgroundColor:'#7c3aed',borderRadius:4,label:'Man-hrs'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}});
-  killChart('wlinft');chartMap['wlinft']=new Chart(document.getElementById('ch-wlinft'),{type:'bar',data:{labels:wlbs,datasets:[{data:wks.map(w=>+wL[w].toFixed(1)),backgroundColor:'rgba(37,99,235,0.5)',borderColor:'#2563eb',borderWidth:1,borderRadius:3,label:'Lin ft'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}});
-  killChart('wavg');chartMap['wavg']=new Chart(document.getElementById('ch-wavg'),{type:'line',data:{labels:wlbs,datasets:[{data:wks.map(w=>wN[w]?+(wT[w]/wN[w]).toFixed(2):0),borderColor:'#7c3aed',backgroundColor:'rgba(124,58,237,0.06)',tension:0.4,fill:true,pointRadius:3,pointBackgroundColor:'#7c3aed',label:'Avg hrs'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}});
-  const cm={};all.forEach(j=>{if(!j.crew)return;j.crew.split(',').forEach(n=>{const nm=n.trim();if(nm)cm[nm]=(cm[nm]||0)+1;});});
-  const cn=Object.keys(cm).sort((a,b)=>cm[b]-cm[a]);
+
+  killChart('wjobs');
+  chartMap['wjobs']=new Chart(document.getElementById('ch-wjobs'),{type:'bar',data:{labels:wlbs,datasets:[{data:wks.map(w=>wJ[w]),backgroundColor:'#2563eb',borderRadius:4,label:'Jobs'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}});
+
+  killChart('whrs');
+  chartMap['whrs']=new Chart(document.getElementById('ch-whrs'),{
+    type:'bar',
+    data:{labels:wlbs,datasets:[
+      {data:wks.map(w=>+wDMH[w].toFixed(2)),label:'Drive man-hrs',backgroundColor:'#2563eb',borderRadius:2},
+      {data:wks.map(w=>+wIMH[w].toFixed(2)),label:'Install man-hrs',backgroundColor:'#15803d',borderRadius:2},
+      {data:wks.map(w=>+(all.filter(j=>gwk(j.date)===w).reduce((s,j)=>s+(j.total_meal_hrs||0)*crewSz(j),0)).toFixed(2)),label:'Meal man-hrs',backgroundColor:'#d97706',borderRadius:2}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:10}}},scales:{x:{stacked:true,ticks:{font:{size:10}},grid:{display:false}},y:{stacked:true,beginAtZero:true,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}}}}
+  });
+
+  killChart('wmanhrs');
+  chartMap['wmanhrs']=new Chart(document.getElementById('ch-wmanhrs'),{type:'bar',data:{labels:wlbs,datasets:[{data:wks.map(w=>+wMH[w].toFixed(1)),backgroundColor:'#7c3aed',borderRadius:4,label:'Man-hrs'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}});
+
+  killChart('wlinft');
+  chartMap['wlinft']=new Chart(document.getElementById('ch-wlinft'),{type:'bar',data:{labels:wlbs,datasets:[{data:wks.map(w=>+wL[w].toFixed(1)),backgroundColor:'rgba(37,99,235,0.5)',borderColor:'#2563eb',borderWidth:1,borderRadius:3,label:'Lin ft'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}});
+
+  killChart('wavg');
+  chartMap['wavg']=new Chart(document.getElementById('ch-wavg'),{type:'line',data:{labels:wlbs,datasets:[{data:wks.map(w=>wCS[w]?+(wMH[w]/wCS[w]).toFixed(2):0),borderColor:'#7c3aed',backgroundColor:'rgba(124,58,237,0.06)',tension:0.4,fill:true,pointRadius:3,pointBackgroundColor:'#7c3aed',label:'Avg man-hrs/crew'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}});
+
+  // ── CREW CHART ─────────────────────────────────────────────────────────────
+  const cmJobs={},cmMH={};
+  all.forEach(j=>{
+    if(!j.crew)return;
+    j.crew.split(',').forEach(n=>{
+      const nm=n.trim();if(!nm)return;
+      cmJobs[nm]=(cmJobs[nm]||0)+1;
+      cmMH[nm]=(cmMH[nm]||0)+(j.total_hrs||0);
+    });
+  });
+  const cn=Object.keys(cmJobs).sort((a,b)=>cmMH[b]-cmMH[a]);
   const cc2=['#2563eb','#15803d','#d97706','#7c3aed','#dc2626','#0891b2','#65a30d','#db2777','#ea580c','#6366f1'];
-  killChart('crew');chartMap['crew']=new Chart(document.getElementById('ch-crew'),{type:'bar',data:{labels:cn,datasets:[{data:cn.map(n=>cm[n]),backgroundColor:cc2.slice(0,cn.length),borderRadius:4,label:'Jobs'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}});
+  killChart('crew');
+  chartMap['crew']=new Chart(document.getElementById('ch-crew'),{
+    type:'bar',
+    data:{labels:cn,datasets:[{data:cn.map(n=>+cmMH[n].toFixed(2)),backgroundColor:cc2.slice(0,cn.length),borderRadius:4,label:'Total hrs'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.raw} hrs | ${cmJobs[ctx.label]} jobs`}}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}
+  });
 
   // ── ISLAND ANALYSIS ────────────────────────────────────────────────────────
   const iJ=all.filter(j=>(j.job_type==='Delivery'||j.job_type==='Grill Install')&&j.lin_ft&&j.total_install_hrs);
   const wPg=iJ.filter(j=>j.pergola==='Yes'&&j.job_type==='Delivery'),nPg=iJ.filter(j=>!(j.pergola==='Yes'&&j.job_type==='Delivery'));
-  const aIA=iJ.length?iJ.reduce((s,j)=>s+j.total_install_hrs,0)/iJ.length:0;
-  const aIP=wPg.length?wPg.reduce((s,j)=>s+j.total_install_hrs,0)/wPg.length:0;
-  const aIN=nPg.length?nPg.reduce((s,j)=>s+j.total_install_hrs,0)/nPg.length:0;
-  document.getElementById('island-metrics').innerHTML=`<div class="metric"><div class="metric-label">Island jobs tracked</div><div class="metric-value">${iJ.length}</div></div><div class="metric green"><div class="metric-label">Avg install hrs (all)</div><div class="metric-value">${aIA.toFixed(1)}</div></div><div class="metric amber"><div class="metric-label">Avg install (w/ pergola)</div><div class="metric-value">${aIP.toFixed(1)}<div class="metric-sub">${wPg.length} jobs</div></div></div><div class="metric blue"><div class="metric-label">Avg install (no pergola)</div><div class="metric-value">${aIN.toFixed(1)}<div class="metric-sub">${nPg.length} jobs</div></div></div>`;
+  const aIA=iJ.length?iJ.reduce((s,j)=>s+(j.total_install_hrs||0)*crewSz(j),0)/iJ.length:0;
+  const aIP=wPg.length?wPg.reduce((s,j)=>s+(j.total_install_hrs||0)*crewSz(j),0)/wPg.length:0;
+  const aIN=nPg.length?nPg.reduce((s,j)=>s+(j.total_install_hrs||0)*crewSz(j),0)/nPg.length:0;
+
+  document.getElementById('island-metrics').innerHTML=`
+    <div class="metric"><div class="metric-label">Island jobs tracked</div><div class="metric-value">${iJ.length}</div></div>
+    <div class="metric green"><div class="metric-label">Avg install man-hrs (all)</div><div class="metric-value">${aIA.toFixed(1)}</div></div>
+    <div class="metric amber"><div class="metric-label">Avg install man-hrs (w/ pergola)</div><div class="metric-value">${aIP.toFixed(1)}<div class="metric-sub">${wPg.length} jobs</div></div></div>
+    <div class="metric blue"><div class="metric-label">Avg install man-hrs (no pergola)</div><div class="metric-value">${aIN.toFixed(1)}<div class="metric-sub">${nPg.length} jobs</div></div></div>`;
+
   const rng=[{l:'0-5',mn:0,mx:5},{l:'6-10',mn:6,mx:10},{l:'11-15',mn:11,mx:15},{l:'16-20',mn:16,mx:20},{l:'21-25',mn:21,mx:25},{l:'26+',mn:26,mx:999}];
   const rc=['#bfdbfe','#93c5fd','#60a5fa','#3b82f6','#2563eb','#1d4ed8'];
-  killChart('linft-range');chartMap['linft-range']=new Chart(document.getElementById('ch-linft-range'),{type:'bar',data:{labels:rng.map(r=>r.l+' ft'),datasets:[{data:rng.map(r=>{const js=iJ.filter(j=>parseFloat(j.lin_ft)>=r.mn&&parseFloat(j.lin_ft)<=r.mx);return js.length?+(js.reduce((s,j)=>s+j.total_install_hrs,0)/js.length).toFixed(2):null;}),backgroundColor:rc,borderRadius:4,label:'Avg hrs'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}});
-  killChart('pergola-compare');chartMap['pergola-compare']=new Chart(document.getElementById('ch-pergola-compare'),{type:'bar',data:{labels:['Avg install hrs','Avg drive hrs','Avg total hrs'],datasets:[{label:'With pergola',data:[wPg.length?+(wPg.reduce((s,j)=>s+(j.total_install_hrs||0),0)/wPg.length).toFixed(2):0,wPg.length?+(wPg.reduce((s,j)=>s+(j.total_drive_hrs||0),0)/wPg.length).toFixed(2):0,wPg.length?+(wPg.reduce((s,j)=>s+(j.total_hrs||0),0)/wPg.length).toFixed(2):0],backgroundColor:'#d97706',borderRadius:4},{label:'Without pergola',data:[nPg.length?+(nPg.reduce((s,j)=>s+(j.total_install_hrs||0),0)/nPg.length).toFixed(2):0,nPg.length?+(nPg.reduce((s,j)=>s+(j.total_drive_hrs||0),0)/nPg.length).toFixed(2):0,nPg.length?+(nPg.reduce((s,j)=>s+(j.total_hrs||0),0)/nPg.length).toFixed(2):0],backgroundColor:'#2563eb',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:10}}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}});
-  killChart('scatter');chartMap['scatter']=new Chart(document.getElementById('ch-scatter'),{type:'scatter',data:{datasets:[{label:'With pergola',data:iJ.filter(j=>j.pergola==='Yes'&&j.job_type==='Delivery').map(j=>({x:+parseFloat(j.lin_ft).toFixed(1),y:+j.total_install_hrs.toFixed(2)})),backgroundColor:'rgba(217,119,6,0.7)',pointRadius:6},{label:'Without pergola',data:iJ.filter(j=>!(j.pergola==='Yes'&&j.job_type==='Delivery')).map(j=>({x:+parseFloat(j.lin_ft).toFixed(1),y:+j.total_install_hrs.toFixed(2)})),backgroundColor:'rgba(37,99,235,0.7)',pointRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:10}},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.raw.x} ft → ${ctx.raw.y} hrs`}}},scales:{x:{title:{display:true,text:'Linear feet',font:{size:10}},ticks:{font:{size:10}}},y:{title:{display:true,text:'Install hrs',font:{size:10}},beginAtZero:true,ticks:{font:{size:10}}}}}});
-
-  killChart('breakdown');
-  chartMap['breakdown'] = new Chart(document.getElementById('ch-breakdown'),{
+  killChart('linft-range');
+  chartMap['linft-range']=new Chart(document.getElementById('ch-linft-range'),{
     type:'bar',
-    data:{
-      labels:['Drive there','Install AM','Meal break','Install PM','Drive back'],
-      datasets:[{
-        data:[
-          parseFloat((all.reduce((s,j)=>s+(j.drive1_hrs||0),0)/(total||1)).toFixed(2)),
-          parseFloat((all.reduce((s,j)=>s+(j.install1_hrs||0),0)/(total||1)).toFixed(2)),
-          parseFloat((all.reduce((s,j)=>s+(j.meal_hrs||0),0)/(total||1)).toFixed(2)),
-          parseFloat((all.reduce((s,j)=>s+(j.install2_hrs||0),0)/(total||1)).toFixed(2)),
-          parseFloat((all.reduce((s,j)=>s+(j.drive2_hrs||0),0)/(total||1)).toFixed(2)),
-        ],
-        backgroundColor:['#2563eb','#15803d','#d97706','#166534','#4338ca'],
-        borderRadius:4,label:'Avg hrs'
-      }]
-    },
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:10}}}}}
+    data:{labels:rng.map(r=>r.l+' ft'),datasets:[{data:rng.map(r=>{
+      const js=iJ.filter(j=>parseFloat(j.lin_ft)>=r.mn&&parseFloat(j.lin_ft)<=r.mx);
+      return js.length?+(js.reduce((s,j)=>s+(j.total_install_hrs||0)*crewSz(j),0)/js.length).toFixed(2):null;
+    }),backgroundColor:rc,borderRadius:4,label:'Avg install man-hrs'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.raw} man-hrs`}}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}
   });
+
+  killChart('pergola-compare');
+  chartMap['pergola-compare']=new Chart(document.getElementById('ch-pergola-compare'),{
+    type:'bar',
+    data:{labels:['Avg install man-hrs','Avg drive man-hrs','Avg total man-hrs'],datasets:[
+      {label:'With pergola',data:[
+        wPg.length?+(wPg.reduce((s,j)=>s+(j.total_install_hrs||0)*crewSz(j),0)/wPg.length).toFixed(2):0,
+        wPg.length?+(wPg.reduce((s,j)=>s+(j.total_drive_hrs||0)*crewSz(j),0)/wPg.length).toFixed(2):0,
+        wPg.length?+(wPg.reduce((s,j)=>s+(j.total_hrs||0)*crewSz(j),0)/wPg.length).toFixed(2):0
+      ],backgroundColor:'#d97706',borderRadius:4},
+      {label:'Without pergola',data:[
+        nPg.length?+(nPg.reduce((s,j)=>s+(j.total_install_hrs||0)*crewSz(j),0)/nPg.length).toFixed(2):0,
+        nPg.length?+(nPg.reduce((s,j)=>s+(j.total_drive_hrs||0)*crewSz(j),0)/nPg.length).toFixed(2):0,
+        nPg.length?+(nPg.reduce((s,j)=>s+(j.total_hrs||0)*crewSz(j),0)/nPg.length).toFixed(2):0
+      ],backgroundColor:'#2563eb',borderRadius:4}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:10}}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}
+  });
+
+  killChart('scatter');
+  chartMap['scatter']=new Chart(document.getElementById('ch-scatter'),{
+    type:'scatter',
+    data:{datasets:[
+      {label:'With pergola',data:iJ.filter(j=>j.pergola==='Yes'&&j.job_type==='Delivery').map(j=>({x:+parseFloat(j.lin_ft).toFixed(1),y:+(j.total_install_hrs||0)*crewSz(j)})),backgroundColor:'rgba(217,119,6,0.7)',pointRadius:6},
+      {label:'Without pergola',data:iJ.filter(j=>!(j.pergola==='Yes'&&j.job_type==='Delivery')).map(j=>({x:+parseFloat(j.lin_ft).toFixed(1),y:+(j.total_install_hrs||0)*crewSz(j)})),backgroundColor:'rgba(37,99,235,0.7)',pointRadius:6}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{size:10},boxWidth:10}},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.raw.x} ft → ${ctx.raw.y} man-hrs`}}},scales:{x:{title:{display:true,text:'Linear feet',font:{size:10}},ticks:{font:{size:10}}},y:{title:{display:true,text:'Install man-hrs',font:{size:10}},beginAtZero:true,ticks:{font:{size:10}}}}}
+  });
+
 }
 
 // ── TOAST ─────────────────────────────────────────────────────────────────────
